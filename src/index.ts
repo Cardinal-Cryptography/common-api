@@ -2,7 +2,11 @@ import { createClient } from "graphql-ws";
 import { WebSocket } from "ws";
 import express from "express";
 import { loadInitBalances, tokenBalancesFromArray } from "./balances/index";
-import { azeroUsdEndpoint, AzeroUsdPriceCache } from "./servers/http";
+import {
+  accountPsp22Balances,
+  azeroUsdEndpoint,
+  AzeroUsdPriceCache,
+} from "./servers/http";
 
 const port = process.env.GQL_PORT || 4351;
 const host = process.env.GQL_HOST || "localhost";
@@ -20,14 +24,14 @@ async function main(): Promise<void> {
 
   const azeroUsdPriceCache = new AzeroUsdPriceCache(0, 0);
 
-  let tokenBalances = await loadInitBalances(graphqlClient);
-  console.log("balances size:", tokenBalances.length);
-  let initBalances = tokenBalancesFromArray(tokenBalances);
-  console.log(`${initBalances}`);
+  let initBalances = tokenBalancesFromArray(
+    await loadInitBalances(graphqlClient),
+  );
 
   azeroUsdEndpoint(httpServer, azeroUsdPriceCache);
+  accountPsp22Balances(httpServer, initBalances);
 
-  httpServer.listen(httpPort, () => {
+  const server = httpServer.listen(httpPort, () => {
     console.log(`HTTP server listening at http://localhost:${httpPort}`);
   });
 }
