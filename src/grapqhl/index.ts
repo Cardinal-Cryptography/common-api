@@ -1,5 +1,5 @@
 import { Client, ExecutionResult } from "graphql-ws";
-import { Observable } from "zen-observable-ts";
+import { Observable } from "rxjs";
 
 import { Connection, ConnectionQuery } from "./connection";
 import { SubscriptionQuery } from "./subscription";

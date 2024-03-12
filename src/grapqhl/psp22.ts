@@ -1,7 +1,7 @@
 import { RawElement, readWholeConnection } from ".";
 import { psp22TokenBalancesConnectionsQuery } from "./queries";
 import { TokenBalances, TokenBalance } from "../balances/psp22";
-import { Observable } from "zen-observable-ts";
+import { Observable, map, reduce } from "rxjs";
 import { Client } from "graphql-ws";
 
 export function tokenBalances$(
@@ -9,8 +9,8 @@ export function tokenBalances$(
   initState: TokenBalances,
 ): Observable<TokenBalances> {
   return rawObservable
-    .map((element) => element.data?.psp22TokenBalances as TokenBalance[])
-    .reduce(updateState, initState);
+    .pipe(map((element) => element.data?.psp22TokenBalances as TokenBalance[]))
+    .pipe(reduce(updateState, initState));
 }
 
 function updateState(
