@@ -1,4 +1,4 @@
-import { TokenBalances } from "../../tokens/psp22";
+import { TokenBalances } from "../../models/psp22";
 import { AzeroUsdPrice, AzeroUsdPriceCache } from "./azeroPrice";
 import express from "express";
 

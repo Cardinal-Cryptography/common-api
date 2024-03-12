@@ -3,7 +3,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import http from "http";
 import express from "express";
 
-import { tokenBalancesFromArray } from "./tokens/psp22";
+import { tokenBalancesFromArray } from "./models/psp22";
 import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
 import {
   accountPsp22Balances,

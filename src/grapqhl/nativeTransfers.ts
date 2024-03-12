@@ -1,5 +1,5 @@
 import { RawElement } from ".";
-import { NativeTransfer } from "../tokens/native";
+import { NativeTransfer } from "../models/nativeTransfer";
 import { Observable, mergeMap } from "rxjs";
 
 export function nativeTransfers$(

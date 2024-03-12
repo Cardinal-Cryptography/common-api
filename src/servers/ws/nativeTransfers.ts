@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { WebSocketServer } from "ws";
-import { NativeTransfer } from "../../tokens/native";
+import { NativeTransfer } from "../../models/nativeTransfer";
 
 export function setupNativeTransfersOverWss(
   wssServer: WebSocketServer,
