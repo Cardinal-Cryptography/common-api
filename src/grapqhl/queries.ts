@@ -20,3 +20,11 @@ export const nativeTransfersSubscriptionQuery: SubscriptionQuery =
     50,
     "timestamp_ASC",
   );
+
+export const poolsV2SubscriptionQuery: SubscriptionQuery =
+  new SubscriptionQuery(
+    "pools",
+    "id token0 token1 reserves0 reserves1 lastUpdateTimestamp",
+    50,
+    "lastUpdateTimestamp_ASC",
+  );

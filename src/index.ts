@@ -14,9 +14,12 @@ import { graphqlSubscribe$ } from "./grapqhl";
 import {
   pspTokenBalancesSubscriptionQuery,
   nativeTransfersSubscriptionQuery,
+  poolsV2SubscriptionQuery,
 } from "./grapqhl/queries";
 import { setupNativeTransfersOverWss } from "./servers/ws/nativeTransfers";
+import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { nativeTransfers$ } from "./grapqhl/nativeTransfers";
+import { poolsV2$ } from "./grapqhl/pools";
 
 const port = process.env.GQL_PORT || 4351;
 const host = process.env.GQL_HOST || "localhost";
@@ -57,6 +60,11 @@ async function main(): Promise<void> {
     nativeTransfersSubscriptionQuery,
   );
 
+  let graphqlPoolV2$ = graphqlSubscribe$(
+    graphqlClient,
+    poolsV2SubscriptionQuery,
+  );
+
   tokenBalances$(graphqlPsp$, initBalances).forEach(
     (balances) => (initBalances = balances),
   );
@@ -64,10 +72,12 @@ async function main(): Promise<void> {
   azeroUsdEndpoint(app, azeroUsdPriceCache);
   accountPsp22Balances(app, initBalances);
 
-  setupNativeTransfersOverWss(
-    wssServer,
-    nativeTransfers$(graphQlNativeTransfers$),
-  );
+  // setupNativeTransfersOverWss(
+  //   wssServer,
+  //   nativeTransfers$(graphQlNativeTransfers$),
+  // );
+
+  setupPoolsV2OverWs(wssServer, poolsV2$(graphqlPoolV2$));
 
   server.listen(httpPort, () => {
     console.log(`HTTP server listening at http://localhost:${httpPort}`);
