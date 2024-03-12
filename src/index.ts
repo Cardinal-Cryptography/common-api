@@ -2,17 +2,21 @@ import { createClient } from "graphql-ws";
 import WebSocket, { WebSocketServer } from "ws";
 import http from "http";
 import express from "express";
-import { tokenBalancesFromArray } from "./balances/psp22";
-import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
 
+import { tokenBalancesFromArray } from "./tokens/psp22";
+import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
 import {
   accountPsp22Balances,
   azeroUsdEndpoint,
   AzeroUsdPriceCache,
 } from "./servers/http";
 import { graphqlSubscribe$ } from "./grapqhl";
-import { pspTokenBalancesSubscriptionQuery } from "./grapqhl/queries";
-import * as wss from "./servers/ws";
+import {
+  pspTokenBalancesSubscriptionQuery,
+  nativeTransfersSubscriptionQuery,
+} from "./grapqhl/queries";
+import { setupNativeTransfersOverWss } from "./servers/ws/nativeTransfers";
+import { nativeTransfers$ } from "./grapqhl/nativeTransfers";
 
 const port = process.env.GQL_PORT || 4351;
 const host = process.env.GQL_HOST || "localhost";
@@ -48,6 +52,11 @@ async function main(): Promise<void> {
     pspTokenBalancesSubscriptionQuery,
   );
 
+  let graphQlNativeTransfers$ = graphqlSubscribe$(
+    graphqlClient,
+    nativeTransfersSubscriptionQuery,
+  );
+
   tokenBalances$(graphqlPsp$, initBalances).forEach(
     (balances) => (initBalances = balances),
   );
@@ -55,7 +64,10 @@ async function main(): Promise<void> {
   azeroUsdEndpoint(app, azeroUsdPriceCache);
   accountPsp22Balances(app, initBalances);
 
-  wss.setup(wssServer);
+  setupNativeTransfersOverWss(
+    wssServer,
+    nativeTransfers$(graphQlNativeTransfers$),
+  );
 
   server.listen(httpPort, () => {
     console.log(`HTTP server listening at http://localhost:${httpPort}`);

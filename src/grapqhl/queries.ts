@@ -14,4 +14,9 @@ export const pspTokenBalancesSubscriptionQuery: SubscriptionQuery =
   );
 
 export const nativeTransfersSubscriptionQuery: SubscriptionQuery =
-  new SubscriptionQuery("nativeTransfers", "amount recipient sender timestamp");
+  new SubscriptionQuery(
+    "nativeTransfers",
+    "extrinsicHash sender recipient amount blockNumber timestamp",
+    50,
+    "timestamp_ASC",
+  );

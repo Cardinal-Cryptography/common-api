@@ -1,6 +1,6 @@
 import { RawElement, readWholeConnection } from ".";
 import { psp22TokenBalancesConnectionsQuery } from "./queries";
-import { TokenBalances, TokenBalance } from "../balances/psp22";
+import { TokenBalances, TokenBalance } from "../tokens/psp22";
 import { Observable, map, reduce } from "rxjs";
 import { Client } from "graphql-ws";
 
