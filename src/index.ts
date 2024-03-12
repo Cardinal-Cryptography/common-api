@@ -2,11 +2,9 @@ import { createClient } from "graphql-ws";
 import WebSocket, { WebSocketServer } from "ws";
 import http from "http";
 import express from "express";
-import {
-  loadInitBalances,
-  tokenBalancesFromArray,
-  tokenBalances$,
-} from "./balances/index";
+import { tokenBalancesFromArray } from "./balances/psp22";
+import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
+
 import {
   accountPsp22Balances,
   azeroUsdEndpoint,

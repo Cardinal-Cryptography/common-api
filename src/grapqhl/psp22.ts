@@ -1,0 +1,29 @@
+import { RawElement, readWholeConnection } from ".";
+import { psp22TokenBalancesConnectionsQuery } from "./queries";
+import { TokenBalances, TokenBalance } from "../balances/psp22";
+import { Observable } from "zen-observable-ts";
+import { Client } from "graphql-ws";
+
+export function tokenBalances$(
+  rawObservable: Observable<RawElement>,
+  initState: TokenBalances,
+): Observable<TokenBalances> {
+  return rawObservable
+    .map((element) => element.data?.psp22TokenBalances as TokenBalance[])
+    .reduce(updateState, initState);
+}
+
+function updateState(
+  latestState: TokenBalances,
+  newValues: TokenBalance[],
+): TokenBalances {
+  latestState.updateBatch(newValues);
+  return latestState;
+}
+
+export function loadInitBalances(client: Client): Promise<TokenBalance[]> {
+  return readWholeConnection<TokenBalance>(
+    client,
+    psp22TokenBalancesConnectionsQuery,
+  );
+}
