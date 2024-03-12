@@ -2,12 +2,18 @@ import { createClient } from "graphql-ws";
 import WebSocket, { WebSocketServer } from "ws";
 import http from "http";
 import express from "express";
-import { loadInitBalances, tokenBalancesFromArray } from "./balances/index";
+import {
+  loadInitBalances,
+  tokenBalancesFromArray,
+  tokenBalances$,
+} from "./balances/index";
 import {
   accountPsp22Balances,
   azeroUsdEndpoint,
   AzeroUsdPriceCache,
 } from "./servers/http";
+import { graphqlSubscribe$ } from "./grapqhl";
+import { pspTokenBalancesSubscriptionQuery } from "./grapqhl/queries";
 import * as wss from "./servers/ws";
 
 const port = process.env.GQL_PORT || 4351;
@@ -37,6 +43,15 @@ async function main(): Promise<void> {
 
   let initBalances = tokenBalancesFromArray(
     await loadInitBalances(graphqlClient),
+  );
+
+  let graphqlPsp$ = graphqlSubscribe$(
+    graphqlClient,
+    pspTokenBalancesSubscriptionQuery,
+  );
+
+  tokenBalances$(graphqlPsp$, initBalances).forEach(
+    (balances) => (initBalances = balances),
   );
 
   azeroUsdEndpoint(app, azeroUsdPriceCache);

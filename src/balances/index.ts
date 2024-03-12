@@ -1,7 +1,7 @@
 import { AccountId, TokenId } from "../shared";
 import { Client } from "graphql-ws";
 import { Observable } from "zen-observable-ts";
-import { toObservable } from "../utils";
+import { RawElement } from "../grapqhl";
 import {
   pspTokenBalancesSubscriptionQuery,
   psp22TokenBalancesConnectionsQuery,
@@ -81,26 +81,21 @@ export function tokenBalancesFromArray(
   return tokenBalances;
 }
 
+export function tokenBalances$(
+  rawObservable: Observable<RawElement>,
+  initState: TokenBalances,
+): Observable<TokenBalances> {
+  return rawObservable
+    .map((element) => element.data?.psp22TokenBalances as TokenBalance[])
+    .reduce(updateState, initState);
+}
+
 function updateState(
   latestState: TokenBalances,
   newValues: TokenBalance[],
 ): TokenBalances {
   latestState.updateBatch(newValues);
   return latestState;
-}
-
-export function tokenBalancesObservable(
-  client: Client,
-  initState: TokenBalances,
-): Observable<TokenBalances> {
-  const psp22TokenBalancesObservable = toObservable(
-    client,
-    pspTokenBalancesSubscriptionQuery,
-  );
-
-  return psp22TokenBalancesObservable
-    .map((element) => element.data?.psp22TokenBalances as TokenBalance[])
-    .reduce(updateState, initState);
 }
 
 export function loadInitBalances(client: Client): Promise<TokenBalance[]> {

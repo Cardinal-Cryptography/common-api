@@ -1,4 +1,5 @@
 import { ConnectionQuery } from "./connection";
+import { SubscriptionQuery } from "./subscription";
 
 export const psp22TokenBalancesConnectionsQuery: ConnectionQuery =
   new ConnectionQuery(
@@ -6,21 +7,11 @@ export const psp22TokenBalancesConnectionsQuery: ConnectionQuery =
     "account amount token lastUpdateBlockHeight lastUpdateTimestamp id",
   );
 
-export const pspTokenBalancesSubscriptionQuery = `subscription { 
-    psp22TokenBalances(limit: 50, orderBy: lastUpdateTimestamp_ASC) {
-        account
-        token
-        amount
-        lastUpdateTimestamp
-        lastUpdateBlockHeight
-    }
-}`;
+export const pspTokenBalancesSubscriptionQuery: SubscriptionQuery =
+  new SubscriptionQuery(
+    "psp22TokenBalances",
+    "account amount token lastUpdateBlockHeight lastUpdateTimestamp",
+  );
 
-export const nativeTransfersSubscriptionQuery = `subscription {
-    nativeTransfers(limit: 10, orderBy: timestamp_ASC) {
-        amount
-        recipient
-        sender
-        timestamp
-    }
-}`;
+export const nativeTransfersSubscriptionQuery: SubscriptionQuery =
+  new SubscriptionQuery("nativeTransfers", "amount recipient sender timestamp");

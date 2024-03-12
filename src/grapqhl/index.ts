@@ -1,5 +1,8 @@
-import { Client } from "graphql-ws";
+import { Client, ExecutionResult } from "graphql-ws";
+import { Observable } from "zen-observable-ts";
+
 import { Connection, ConnectionQuery } from "./connection";
+import { SubscriptionQuery } from "./subscription";
 
 /**
  * Executes GraphQL connection query that iterates over the paginated results.
@@ -44,4 +47,22 @@ export async function readWholeConnection<T>(
     }
   }
   return nodes;
+}
+
+export type RawElement = ExecutionResult<Record<string, unknown>, unknown>;
+
+export function graphqlSubscribe$(
+  client: Client,
+  subscription: SubscriptionQuery,
+): Observable<RawElement> {
+  return new Observable((observer) =>
+    client.subscribe(
+      { query: subscription.intoQuery() },
+      {
+        next: (data) => observer.next(data),
+        error: (err) => observer.error(err),
+        complete: () => observer.complete(),
+      },
+    ),
+  );
 }
