@@ -5,11 +5,7 @@ import express from "express";
 
 import { tokenBalancesFromArray } from "./models/psp22";
 import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
-import {
-  accountPsp22Balances,
-  azeroUsdEndpoint,
-  AzeroUsdPriceCache,
-} from "./servers/http";
+import * as rest from "./servers/http";
 import { graphqlSubscribe$ } from "./grapqhl";
 import {
   pspTokenBalancesSubscriptionQuery,
@@ -19,6 +15,7 @@ import {
 import { setupNativeTransfersOverWss } from "./servers/ws/nativeTransfers";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { nativeTransfers$ } from "./grapqhl/nativeTransfers";
+import { AzeroUsdPriceCache } from "./services/azeroPrice";
 import { poolsV2$ } from "./grapqhl/pools";
 
 const port = process.env.GQL_PORT || 4351;
@@ -69,8 +66,8 @@ async function main(): Promise<void> {
     (balances) => (initBalances = balances),
   );
 
-  azeroUsdEndpoint(app, azeroUsdPriceCache);
-  accountPsp22Balances(app, initBalances);
+  rest.azeroUsdEndpoint(app, azeroUsdPriceCache);
+  rest.accountPsp22BalancesEndpoint(app, initBalances);
 
   // setupNativeTransfersOverWss(
   //   wssServer,

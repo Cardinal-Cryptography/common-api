@@ -1,5 +1,6 @@
 import { TokenBalances } from "../../models/psp22";
-import { AzeroUsdPrice, AzeroUsdPriceCache } from "./azeroPrice";
+import { AzeroUsdPrice } from "../../models/azeroUsdPrice";
+import { AzeroUsdPriceCache } from "../../services/azeroPrice";
 import express from "express";
 
 export { AzeroUsdPrice, AzeroUsdPriceCache };
@@ -8,18 +9,18 @@ export function azeroUsdEndpoint(
   app: express.Express,
   azeroUsdPriceCache: AzeroUsdPriceCache,
 ) {
-  app.get("/azero_usd", (req, res) => {
+  app.get("/api/azero_usd", (req, res) => {
     azeroUsdPriceCache.getPrice().then((response) => {
       res.send(response);
     });
   });
 }
 
-export function accountPsp22Balances(
+export function accountPsp22BalancesEndpoint(
   app: express.Express,
   balances: TokenBalances,
 ) {
-  app.get("/accounts/:accountId", (req, res) => {
+  app.get("/api/accounts/:accountId", (req, res) => {
     let accountBalances = balances.balances.get(req.params.accountId);
     if (accountBalances === undefined) {
       res.status(404).send("Account not found");
@@ -32,7 +33,7 @@ export function accountPsp22Balances(
     res.contentType("application/json").send(str);
   });
 
-  app.get("/accounts/:accountId/tokens/:token", (req, res) => {
+  app.get("/api/accounts/:accountId/tokens/:token", (req, res) => {
     let accountBalances = balances.balances.get(req.params.accountId);
     if (accountBalances === undefined) {
       res.status(404).send("Account not found");

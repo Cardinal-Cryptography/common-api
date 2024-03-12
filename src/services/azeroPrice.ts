@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { AzeroUsdPrice } from "../models/azeroUsdPrice";
+
 const INVALIDATE_EVERY_HOUR: number = 60 * 60;
 
 // Default to 1 hour price cache validity.
@@ -68,9 +70,4 @@ export class AzeroUsdPriceCache {
     const cacheAge = Date.now() - this.lastUpdateTimestampMillis;
     return cacheAge > AZERO_USD_PRICE_INVALIDITY_SECONDS * 1000;
   }
-}
-
-export interface AzeroUsdPrice {
-  price: number;
-  lastUpdateTimestampMillis: number;
 }
