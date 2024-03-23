@@ -15,4 +15,4 @@ format: # Formats the code.
 
 .PHONY: up
 up: # Starts the app.
-	npm run start
+	export ENABLE_PRICE_CACHE=true && npm run start

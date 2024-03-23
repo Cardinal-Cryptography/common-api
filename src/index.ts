@@ -15,7 +15,7 @@ import {
 import { setupNativeTransfersOverWss } from "./servers/ws/nativeTransfers";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { nativeTransfers$ } from "./grapqhl/nativeTransfers";
-import { AzeroUsdPriceCache } from "./services/azeroPrice";
+import { UsdPriceCache } from "./services/usdPriceCache";
 import { poolsV2$ } from "./grapqhl/pools";
 import { poolDataSample$ } from "./mocks/pools";
 
@@ -29,8 +29,11 @@ const wsHost = process.env.WS_HOST || "localhost";
 
 const isDemo = process.env.DEMO || false;
 
+const USD_PRICE_CACHE = process.env.ENABLE_PRICE_CACHE ? true : false;
+
 async function main(): Promise<void> {
   const app = express();
+  const server = http.createServer(app);
 
   const wsOptions = { host: wsHost, port: wsPort };
 
@@ -38,9 +41,28 @@ async function main(): Promise<void> {
     console.log(`WS server listening at ws://localhost:${wsPort}`);
   });
 
-  const server = http.createServer(app);
+  server.listen(httpPort, () => {
+    console.log(`HTTP server listening at http://localhost:${httpPort}`);
+  });
 
-  const azeroUsdPriceCache = new AzeroUsdPriceCache(0, 0);
+  if (USD_PRICE_CACHE) {
+    console.log("USD price cache enabled");
+
+    const azeroUsdPriceCache = new UsdPriceCache("aleph-zero");
+    const ethUsdPriceCache = new UsdPriceCache("ethereum");
+    const bitcoinUsdPriceCache = new UsdPriceCache("bitcoin");
+    const usdtUsdPriceCache = new UsdPriceCache("tether");
+    const usdcUsdPriceCache = new UsdPriceCache("usd-coin");
+
+    rest.usdPriceEndpoints(
+      app,
+      azeroUsdPriceCache,
+      ethUsdPriceCache,
+      bitcoinUsdPriceCache,
+      usdtUsdPriceCache,
+      usdcUsdPriceCache,
+    );
+  }
 
   if (isDemo) {
     setupPoolsV2OverWs(wssServer, poolDataSample$);
@@ -82,12 +104,6 @@ async function main(): Promise<void> {
 
     setupPoolsV2OverWs(wssServer, poolsV2$(graphqlPoolV2$));
   }
-
-  rest.azeroUsdEndpoint(app, azeroUsdPriceCache);
-
-  server.listen(httpPort, () => {
-    console.log(`HTTP server listening at http://localhost:${httpPort}`);
-  });
 }
 
 main();

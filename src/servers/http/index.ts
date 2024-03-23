@@ -1,16 +1,37 @@
 import { TokenBalances } from "../../models/psp22";
-import { AzeroUsdPrice } from "../../models/azeroUsdPrice";
-import { AzeroUsdPriceCache } from "../../services/azeroPrice";
+import { UsdPriceCache } from "../../services/usdPriceCache";
 import express from "express";
 
-export { AzeroUsdPrice, AzeroUsdPriceCache };
-
-export function azeroUsdEndpoint(
+export function usdPriceEndpoints(
   app: express.Express,
-  azeroUsdPriceCache: AzeroUsdPriceCache,
+  azeroUsdPriceCache: UsdPriceCache,
+  ethereumUsdPriceCache: UsdPriceCache,
+  bitcoinUsdPriceCache: UsdPriceCache,
+  usdtUsdPriceCache: UsdPriceCache,
+  usdcUsdPriceCache: UsdPriceCache,
 ) {
-  app.get("/api/azero_usd", (req, res) => {
+  app.get("/api/v1/price/usd/azero", (_req, res) => {
     azeroUsdPriceCache.getPrice().then((response) => {
+      res.send(response);
+    });
+  });
+  app.get("/api/v1/price/usd/ethereum", (_req, res) => {
+    ethereumUsdPriceCache.getPrice().then((response) => {
+      res.send(response);
+    });
+  });
+  app.get("/api/v1/price/usd/bitcoin", (_req, res) => {
+    bitcoinUsdPriceCache.getPrice().then((response) => {
+      res.send(response);
+    });
+  });
+  app.get("/api/v1/price/usd/usdt", (_req, res) => {
+    usdtUsdPriceCache.getPrice().then((response) => {
+      res.send(response);
+    });
+  });
+  app.get("/api/v1/price/usd/usdc", (_req, res) => {
+    usdcUsdPriceCache.getPrice().then((response) => {
       res.send(response);
     });
   });
