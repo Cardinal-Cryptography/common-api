@@ -1,0 +1,18 @@
+{
+  // Ignored if enableGraphQl=false
+  "graphql": {
+    "proto": "ws",
+    "host": "localhost",
+    "port": 4351
+  },
+  "http": {
+    "proto": "http",
+    "host": "localhost",
+    "port": 3000
+  },
+  "ws": {
+    "proto": "ws",
+    "host": "localhost",
+    "port": 8080
+  }
+}

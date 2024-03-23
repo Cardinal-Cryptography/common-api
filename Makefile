@@ -14,5 +14,5 @@ format: # Formats the code.
 	npm run format
 
 .PHONY: up
-up: # Starts the app.
-	export ENABLE_PRICE_CACHE=true && npm run start
+local-up: # Starts the app.
+	export NODE_CONFIG_DIR=src/config && npm run start
