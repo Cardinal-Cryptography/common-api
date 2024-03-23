@@ -13,19 +13,19 @@ const USD_PRICE_INVALIDITY_SECONDS: number =
 export class UsdPriceCache {
   ticker: string;
   price: number;
-  lastUpdateTimestampMillis: number;
+  lastUpdateTimestampSeconds: number;
 
   constructor(ticker: string) {
     this.ticker = ticker;
     this.price = 0;
-    this.lastUpdateTimestampMillis = 0;
+    this.lastUpdateTimestampSeconds = 0;
   }
 
   async getPrice(): Promise<UsdTokenPrice> {
     if (!this.refreshPrice()) {
       return {
         price: this.price,
-        lastUpdateTimestampMillis: this.lastUpdateTimestampMillis,
+        lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
       };
     }
     try {
@@ -34,17 +34,16 @@ export class UsdPriceCache {
         const data = response.data;
         this.price = data[this.ticker]["usd"];
         // Multiply by 1000, Coingecko API returns timestamp in seconds.
-        this.lastUpdateTimestampMillis =
-          data[this.ticker]["last_updated_at"] * 1000;
+        this.lastUpdateTimestampSeconds = data[this.ticker]["last_updated_at"];
         return {
           price: this.price,
-          lastUpdateTimestampMillis: this.lastUpdateTimestampMillis,
+          lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       } else if (response.status == 429) {
         console.log("Rate limited, returning cached price");
         return {
           price: this.price,
-          lastUpdateTimestampMillis: this.lastUpdateTimestampMillis,
+          lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       } else {
         console.error(
@@ -53,21 +52,21 @@ export class UsdPriceCache {
         );
         return {
           price: this.price,
-          lastUpdateTimestampMillis: this.lastUpdateTimestampMillis,
+          lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       }
     } catch (e) {
       console.error(`Error fetching ${this.ticker} price`, e);
       return {
         price: this.price,
-        lastUpdateTimestampMillis: this.lastUpdateTimestampMillis,
+        lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
       };
     }
   }
 
   private refreshPrice(): boolean {
-    const cacheAge = Date.now() - this.lastUpdateTimestampMillis;
-    return cacheAge > USD_PRICE_INVALIDITY_SECONDS * 1000;
+    const cacheAge = Date.now() / 1000 - this.lastUpdateTimestampSeconds;
+    return cacheAge > USD_PRICE_INVALIDITY_SECONDS;
   }
 
   private query(): string {

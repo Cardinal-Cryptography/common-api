@@ -31,7 +31,9 @@ async function main(): Promise<void> {
     console.log(`HTTP server listening at http://localhost:${httpPort}`);
   });
 
-  if (process.env.PRICE_CACHE) {
+  const isPriceCacheEnabled = process.env.PRICE_CACHE === "true";
+
+  if (isPriceCacheEnabled) {
     console.log("USD price cache enabled");
 
     const azeroUsdPriceCache = new UsdPriceCache("aleph-zero");

@@ -1,4 +1,4 @@
 export interface UsdTokenPrice {
   price: number;
-  lastUpdateTimestampMillis: number;
+  lastUpdateTimestampSeconds: number;
 }
