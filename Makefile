@@ -16,3 +16,7 @@ format: # Formats the code.
 .PHONY: up
 local-up: # Starts the app.
 	npm run start
+
+.PHONY: show-envs
+show-envs: # Shows the environment variables that are set.
+	@(env | grep 'COMMON_API_' || true)

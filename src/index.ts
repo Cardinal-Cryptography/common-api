@@ -80,7 +80,7 @@ async function main(): Promise<void> {
     } else if (config.enableGraphql) {
       console.log("Enabling updates over GraphQL/WS");
       const graphqlClientUrl = `${config.graphql.proto}://${config.graphql.host}:${config.graphql.port}/graphql`;
-      console.log(`Connecting Graphql client to ${graphqlClientUrl}`)
+      console.log(`Connecting Graphql client to ${graphqlClientUrl}`);
       const graphqlClient = createClient({
         webSocketImpl: WebSocket,
         url: graphqlClientUrl,

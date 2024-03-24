@@ -25,19 +25,19 @@ Currently does the following:
 
 1. GraphQL client controlled with three env variables:
 
-- `GQL_PROTO` - defaults to `ws`
-- `GQL_HOST` - defaults to `localhost`
-- `GQL_PORT` - defaults to `4351`
+- `COMMON_API_GQL_PROTO` - defaults to `ws`
+- `COMMON_API_GQL_HOST` - defaults to `localhost`
+- `COMMON_API_GQL_PORT` - defaults to `4351`
 
-Subscription can be turned off by setting env `ENABLE_GRAPHQL=false`.
+Subscription can be turned off by setting env `COMMON_API_ENABLE_GRAPHQL=false`.
 
 2. HTTP REST controlled with:
 
-- `HTTP_PORT` specifies the port to which the HTTP server binds to. Defaults to `3000`.
+- `COMMON_API_HTTP_PORT` specifies the port to which the HTTP server binds to. Defaults to `3000`.
 
 3. Websocket server controlled with:
 
-- `WS_PORT` defaults to `80`.
+- `COMMON_API_WS_PORT` defaults to `80`.
 
 When client connects over websocket - it will push `pool` updates to the client. Data format description below.
 
