@@ -47,6 +47,13 @@ HTTP server, currently, supports the following endpoints:
 - `GET /accounts/:accountId` returns account's tokens balances.
 - `GET /accounts/:accountId/tokens/:token` returns a balance of `:token` under `:accountId`
 
+## Configuration
+
+Application's settings can be controlled in three ways (from highest to lowest priority):
+1. Env variables. All variables have a common prefix `COMMON_API_`. To list all currently set envs run `make show-envs` in the root directory.
+2. Configuration file. We use [node-config](https://github.com/node-config/node-config) for managing the configuration. There's a strict order of loading files so consult the [wiki](https://github.com/node-config/node-config/wiki/Configuration-Files#file-load-order) to understand it. Currently, `/config` directory contains a single `local.json` file which is quite low on the precedence list.
+3. Defaults. 
+
 ## Demo mode
 
 So called DEMO mode is available. If enabled, Common API will not subscribe to updates from the GraphQL database but send a mocked pool reserves data every second, down to the client.
