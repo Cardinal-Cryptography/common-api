@@ -20,39 +20,40 @@ export class Config {
 
   constructor() {
     const http_port: number =
-      process.env.HTTP_PORT ||
+      process.env.COMMON_API_HTTP_PORT ||
       (config.has("http.port") ? config.http.port : 3000);
 
     const ws_host =
-      process.env.WS_HOST ||
+      process.env.COMMON_API_WS_HOST ||
       (config.has("ws.host") ? config.ws.host : "localhost");
     const ws_port =
-      process.env.WS_PORT || (config.has("ws.port") ? config.ws.port : 80);
+      process.env.COMMON_API_WS_PORT ||
+      (config.has("ws.port") ? config.ws.port : 80);
 
     const graphql_proto =
-      process.env.GRAPHQL_PROTO ||
+      process.env.COMMON_API_GRAPHQL_PROTO ||
       (config.has("graphql.proto") ? config.graphql.proto : "ws");
     const graphql_host =
-      process.env.GRAPHQL_HOST ||
+      process.env.COMMON_API_GRAPHQL_HOST ||
       (config.has("graphql.host") ? config.graphql.host : "localhost");
     const graphql_port =
-      process.env.GRAPHQL_PORT ||
+      process.env.COMMON_API_GRAPHQL_PORT ||
       (config.has("graphql.port") ? config.graphql.port : 4351);
 
     const priceCacheInvaliditySeconds =
-      process.env.PRICE_CACHE_INVALIDITY_SECONDS ||
+      process.env.COMMON_API_PRICE_CACHE_INVALIDITY_SECONDS ||
       (config.has("priceCacheInvaliditySeconds")
         ? config.priceCacheInvaliditySeconds
         : 3600);
 
-    this.enablePriceCache = process.env.ENABLE_PRICE_CACHE
-      ? process.env.ENABLE_PRICE_CACHE === "true"
+    this.enablePriceCache = process.env.COMMON_API_ENABLE_PRICE_CACHE
+      ? process.env.COMMON_API_ENABLE_PRICE_CACHE === "true"
       : true;
-    this.enableDemoMode = process.env.ENABLE_DEMO_MODE
-      ? process.env.ENABLE_DEMO_MODE === "true"
+    this.enableDemoMode = process.env.COMMON_API_ENABLE_DEMO_MODE
+      ? process.env.COMMON_API_ENABLE_DEMO_MODE === "true"
       : false;
-    this.enableGraphql = process.env.ENABLE_GRAPHQL
-      ? process.env.ENABLE_GRAPHQL === "true"
+    this.enableGraphql = process.env.COMMON_API_ENABLE_GRAPHQL
+      ? process.env.COMMON_API_ENABLE_GRAPHQL === "true"
       : false;
 
     this.priceCacheInvaliditySeconds = priceCacheInvaliditySeconds;
