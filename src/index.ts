@@ -79,9 +79,11 @@ async function main(): Promise<void> {
       setupPoolsV2OverWs(wsServer, poolDataSample$);
     } else if (config.enableGraphql) {
       console.log("Enabling updates over GraphQL/WS");
+      const graphqlClientUrl = `${config.graphql.proto}://${config.graphql.host}:${config.graphql.port}/graphql`;
+      console.log(`Connecting Graphql client to ${graphqlClientUrl}`)
       const graphqlClient = createClient({
         webSocketImpl: WebSocket,
-        url: `${config.graphql.proto}://${config.graphql.host}:${config.graphql.port}/graphql`,
+        url: graphqlClientUrl,
       });
 
       let initBalances = tokenBalancesFromArray(
