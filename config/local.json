@@ -1,0 +1,19 @@
+{
+  "enablePriceCache": true,
+  "enableDemoMode": false,
+  "enableGraphQl": false,
+  "priceCacheInvaliditySeconds": 3600,
+  "http": {
+    "port": 3001
+  },
+  "ws": {
+    "host": "localhost",
+    "port": 8080
+  },
+  // Ignored if enableGraphQl=false
+  "graphql": {
+    "proto": "ws",
+    "host": "localhost",
+    "port": 4351
+  }
+}
