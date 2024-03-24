@@ -7,13 +7,13 @@ help: # Show help for each of the Makefile recipes.
 
 .PHONY: demo
 demo: # Starts the CommonAPI in a demo mode. Feeding mocked data.
-	export DEMO=true && npm run start
+	export COMMON_API_ENABLE_DEMO_MODE=true && npm run start
 
 .PHONY: format
 format: # Formats the code.
 	npm run format
 
-.PHONY: up
+.PHONY: local-up
 local-up: # Starts the app.
 	npm run start
 
