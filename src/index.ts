@@ -82,7 +82,7 @@ async function main(): Promise<void> {
       console.log("Running in demo mode");
       const source = poolDataSample$.pipe(share());
       source.forEach((pool) => pools.update(pool));
-      setupPoolsV2OverWs(wsServer, source);
+      setupPoolsV2OverWs(wsServer, source, pools);
     } else if (config.enableGraphql) {
       const graphqlClientUrl = `${config.graphql.proto}://${config.graphql.host}:${config.graphql.port}/graphql`;
 
@@ -106,7 +106,7 @@ async function main(): Promise<void> {
       let poolsV2Updates$ = poolsV2$(graphqlPoolV2$).pipe(share());
 
       poolsV2Updates$.forEach((pool) => pools.update(pool));
-      setupPoolsV2OverWs(wsServer, poolsV2Updates$);
+      setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
 
       // let initBalances = tokenBalancesFromArray(
       //   await loadInitBalances(graphqlClient),

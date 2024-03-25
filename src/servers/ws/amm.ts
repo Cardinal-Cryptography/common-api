@@ -1,12 +1,18 @@
 import { Observable } from "rxjs";
 import { WebSocketServer } from "ws";
-import { PoolV2 } from "../../models/pool";
+import { Pools, PoolV2 } from "../../models/pool";
 
 export function setupPoolsV2OverWs(
   wssServer: WebSocketServer,
   pools: Observable<PoolV2>,
+  knownState: Pools,
 ) {
   wssServer.on("connection", (ws, request) => {
+    ws.send(JSON.stringify(Object.fromEntries(knownState.pools)), (error) => {
+      if (error) {
+        console.log("error sending known state", error);
+      }
+    });
     const subscription = pools.subscribe((pool) => {
       ws.send(JSON.stringify(pool), function () {
         //
