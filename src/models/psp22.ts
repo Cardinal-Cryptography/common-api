@@ -1,7 +1,7 @@
 import { AccountId, TokenId } from "../shared";
 
 export interface TokenBalance {
-  account: TokenId;
+  account: AccountId;
   token: TokenId;
   amount: bigint;
   lastUpdateTimestamp: bigint;
@@ -63,12 +63,4 @@ export class TokenBalances {
     });
     return result;
   }
-}
-
-export function tokenBalancesFromArray(
-  balances: TokenBalance[],
-): TokenBalances {
-  const tokenBalances = new TokenBalances();
-  tokenBalances.updateBatch(balances);
-  return tokenBalances;
 }

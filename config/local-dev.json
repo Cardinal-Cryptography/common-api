@@ -7,10 +7,9 @@
     "host": "localhost",
     "port": 8080
   },
-  // Ignored if enableGraphQl=false
   "graphql": {
-    "proto": "ws",
-    "host": "localhost",
-    "port": 4351
+    "proto": "wss",
+    "host": "squid-graphql.dev.azero.dev",
+    "port": 443
   }
 }

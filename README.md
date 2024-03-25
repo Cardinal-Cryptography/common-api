@@ -43,16 +43,19 @@ When client connects over websocket - it will push `pool` updates to the client.
 
 HTTP server, currently, supports the following endpoints:
 
-- `GET /azero_usd` where it serves the A0 price in dollars.
-- `GET /accounts/:accountId` returns account's tokens balances.
-- `GET /accounts/:accountId/tokens/:token` returns a balance of `:token` under `:accountId`
+- `GET /api/v1/price/usd/azero` where it serves the A0 price in dollars.
+- `GET /api/v1/accounts/:accountId` returns account's tokens balances.
+- `GET /api/v1/accounts/:accountId/tokens/:token` returns a balance of `:token` under `:accountId`
+- `GET /api/v1/pools` returns reserves of all indexed pools.
+- `GET /api/v1/pools/:poolId` returns reserves of a specific pool
 
 ## Configuration
 
 Application's settings can be controlled in three ways (from highest to lowest priority):
+
 1. Env variables. All variables have a common prefix `COMMON_API_`. To list all currently set envs run `make show-envs` in the root directory.
 2. Configuration file. We use [node-config](https://github.com/node-config/node-config) for managing the configuration. There's a strict order of loading files so consult the [wiki](https://github.com/node-config/node-config/wiki/Configuration-Files#file-load-order) to understand it. Currently, `/config` directory contains a single `local.json` file which is quite low on the precedence list.
-3. Defaults. 
+3. Defaults.
 
 ## Demo mode
 
@@ -112,7 +115,7 @@ Currently supported tickers are:
 { "price": 1.52, "lastUpdateTimestampSeconds": 1710250979 }
 ```
 
-### `GET /accounts/:accountId` - Account balance
+### `GET /api/v1/accounts/:accountId` - Account balance
 
 Returns last known state of the `:accountId`.
 
@@ -142,7 +145,7 @@ Returns last known state of the `:accountId`.
 }
 ```
 
-### `GET /accounts/:accountId/tokens/:token` - Account's specific token state
+### `GET /api/v1/accounts/:accountId/tokens/:token` - Account's specific token state
 
 Returns last known state of `:token` for `:accountId`. Example format of the response is:
 
@@ -154,5 +157,47 @@ Returns last known state of `:token` for `:accountId`. Example format of the res
   "lastUpdateBlockHeight": "50928711",
   "lastUpdateTimestamp": "1704291321000",
   "id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY-5GtkZxmJtKmzygr3CkgFjhmmaGprYNb6XYnMxLRy9BKharh1"
+}
+```
+
+### `GET /api/v1/pools`
+
+Returns all known pools' reserves. Example response is:
+
+```json
+{
+  "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd": {
+    "id": "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd",
+    "token0": "5E2xuRb3k5h4TdrPAK543TiFBdRvhWSTmz6qT6b1hfq6LA2U",
+    "token1": "5HKuP2yvvK2MXst7sgGnG715DqVifidEzwopunjKVtRNA1tf",
+    "reserves0": "4000000000000000000000",
+    "reserves1": "80000000000000000",
+    "lastUpdateTimestamp": "1703774256000"
+  },
+  "5CtfFw2GBs2MTppjWPWx8ewSwVGpwVyfyj9E4GKf4SetxHJm": {
+    "id": "5CtfFw2GBs2MTppjWPWx8ewSwVGpwVyfyj9E4GKf4SetxHJm",
+    "token0": "5EAAet9jxK8a4xZk35YeMJgTFUVswEQzbRox32qYK8W2KBCn",
+    "token1": "5GUfU2RbEPyGjvojUwoZua3L4X2FiYf213Lddvj3PgFYpAAL",
+    "reserves0": "1993375349255972651",
+    "reserves1": "3010000000000000000000",
+    "lastUpdateTimestamp": "1708125424000"
+  }
+}
+```
+
+So `Map<PoolId, Pool>` - a mapping between pool's ID (address) and its last-known state.
+
+### `GET /api/v1/pools/:poolId` - specific pool's reserves
+
+Returns current reserves of a specific pool, identifier by `poolId`. Example response:
+
+```json
+{
+  "id": "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd",
+  "token0": "5E2xuRb3k5h4TdrPAK543TiFBdRvhWSTmz6qT6b1hfq6LA2U",
+  "token1": "5HKuP2yvvK2MXst7sgGnG715DqVifidEzwopunjKVtRNA1tf",
+  "reserves0": "4000000000000000000000",
+  "reserves1": "80000000000000000",
+  "lastUpdateTimestamp": "1703774256000"
 }
 ```

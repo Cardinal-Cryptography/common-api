@@ -28,3 +28,8 @@ export const poolsV2SubscriptionQuery: SubscriptionQuery =
     50,
     "lastUpdateTimestamp_ASC",
   );
+
+export const poolsV2ConnectionsQuery: ConnectionQuery = new ConnectionQuery(
+  "pools",
+  "id token0 token1 reserves0 reserves1 lastUpdateTimestamp",
+);

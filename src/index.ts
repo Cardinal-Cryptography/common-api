@@ -4,7 +4,6 @@ import http from "http";
 import express from "express";
 
 import { Config } from "./config";
-import { tokenBalancesFromArray } from "./models/psp22";
 import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
 import * as rest from "./servers/http";
 import { graphqlSubscribe$ } from "./grapqhl";
@@ -17,8 +16,10 @@ import { setupNativeTransfersOverWss } from "./servers/ws/nativeTransfers";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { nativeTransfers$ } from "./grapqhl/nativeTransfers";
 import { UsdPriceCache } from "./services/usdPriceCache";
-import { poolsV2$ } from "./grapqhl/pools";
+import { loadInitPoolReserves, poolsV2$ } from "./grapqhl/pools";
 import { poolDataSample$ } from "./mocks/pools";
+import { Pools } from "./models/pool";
+import { share } from "rxjs";
 
 async function main(): Promise<void> {
   const app = express();
@@ -32,6 +33,9 @@ async function main(): Promise<void> {
       `HTTP server listening at http://localhost:${config.http.port}`,
     );
   });
+
+  let pools = new Pools();
+  rest.poolsV2Endpoints(app, pools);
 
   if (config.enablePriceCache) {
     console.log("USD price cache enabled");
@@ -76,47 +80,58 @@ async function main(): Promise<void> {
 
     if (config.enableDemoMode) {
       console.log("Running in demo mode");
-      setupPoolsV2OverWs(wsServer, poolDataSample$);
+      const source = poolDataSample$.pipe(share());
+      source.forEach((pool) => pools.update(pool));
+      setupPoolsV2OverWs(wsServer, source, pools);
     } else if (config.enableGraphql) {
-      console.log("Enabling updates over GraphQL/WS");
       const graphqlClientUrl = `${config.graphql.proto}://${config.graphql.host}:${config.graphql.port}/graphql`;
+
+      console.log("Enabling updates over GraphQL/WS");
       console.log(`Connecting Graphql client to ${graphqlClientUrl}`);
+
       const graphqlClient = createClient({
         webSocketImpl: WebSocket,
         url: graphqlClientUrl,
       });
 
-      let initBalances = tokenBalancesFromArray(
-        await loadInitBalances(graphqlClient),
-      );
-
-      let graphqlPsp$ = graphqlSubscribe$(
-        graphqlClient,
-        pspTokenBalancesSubscriptionQuery,
-      );
-
-      let graphQlNativeTransfers$ = graphqlSubscribe$(
-        graphqlClient,
-        nativeTransfersSubscriptionQuery,
-      );
+      loadInitPoolReserves(graphqlClient).then((initPools) => {
+        pools.updateBatch(initPools);
+      });
 
       let graphqlPoolV2$ = graphqlSubscribe$(
         graphqlClient,
         poolsV2SubscriptionQuery,
       );
 
-      tokenBalances$(graphqlPsp$, initBalances).forEach(
-        (balances) => (initBalances = balances),
-      );
+      let poolsV2Updates$ = poolsV2$(graphqlPoolV2$).pipe(share());
 
-      rest.accountPsp22BalancesEndpoint(app, initBalances);
+      poolsV2Updates$.forEach((pool) => pools.update(pool));
+      setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
 
-      setupNativeTransfersOverWss(
-        wsServer,
-        nativeTransfers$(graphQlNativeTransfers$),
-      );
+      // let initBalances = tokenBalancesFromArray(
+      //   await loadInitBalances(graphqlClient),
+      // );
 
-      setupPoolsV2OverWs(wsServer, poolsV2$(graphqlPoolV2$));
+      // let graphqlPsp$ = graphqlSubscribe$(
+      //   graphqlClient,
+      //   pspTokenBalancesSubscriptionQuery,
+      // );
+
+      // let graphQlNativeTransfers$ = graphqlSubscribe$(
+      //   graphqlClient,
+      //   nativeTransfersSubscriptionQuery,
+      // );
+
+      // tokenBalances$(graphqlPsp$, initBalances).forEach(
+      //   (balances) => (initBalances = balances),
+      // );
+
+      // rest.accountPsp22BalancesEndpoint(app, initBalances);
+
+      // setupNativeTransfersOverWss(
+      //   wsServer,
+      //   nativeTransfers$(graphQlNativeTransfers$),
+      // );
     }
   } else {
     console.log("Updates over GraphQL/WS are disabled.");
