@@ -160,32 +160,32 @@ Returns last known state of `:token` for `:accountId`. Example format of the res
 }
 ```
 
-### `GET /api/v1/pools` 
+### `GET /api/v1/pools`
 
 Returns all known pools' reserves. Example response is:
+
 ```json
 {
-    "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd": {
-        "id": "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd",
-        "token0": "5E2xuRb3k5h4TdrPAK543TiFBdRvhWSTmz6qT6b1hfq6LA2U",
-        "token1": "5HKuP2yvvK2MXst7sgGnG715DqVifidEzwopunjKVtRNA1tf",
-        "reserves0": "4000000000000000000000",
-        "reserves1": "80000000000000000",
-        "lastUpdateTimestamp": "1703774256000"
-    },
-    "5CtfFw2GBs2MTppjWPWx8ewSwVGpwVyfyj9E4GKf4SetxHJm": {
-        "id": "5CtfFw2GBs2MTppjWPWx8ewSwVGpwVyfyj9E4GKf4SetxHJm",
-        "token0": "5EAAet9jxK8a4xZk35YeMJgTFUVswEQzbRox32qYK8W2KBCn",
-        "token1": "5GUfU2RbEPyGjvojUwoZua3L4X2FiYf213Lddvj3PgFYpAAL",
-        "reserves0": "1993375349255972651",
-        "reserves1": "3010000000000000000000",
-        "lastUpdateTimestamp": "1708125424000"
-    }
+  "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd": {
+    "id": "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd",
+    "token0": "5E2xuRb3k5h4TdrPAK543TiFBdRvhWSTmz6qT6b1hfq6LA2U",
+    "token1": "5HKuP2yvvK2MXst7sgGnG715DqVifidEzwopunjKVtRNA1tf",
+    "reserves0": "4000000000000000000000",
+    "reserves1": "80000000000000000",
+    "lastUpdateTimestamp": "1703774256000"
+  },
+  "5CtfFw2GBs2MTppjWPWx8ewSwVGpwVyfyj9E4GKf4SetxHJm": {
+    "id": "5CtfFw2GBs2MTppjWPWx8ewSwVGpwVyfyj9E4GKf4SetxHJm",
+    "token0": "5EAAet9jxK8a4xZk35YeMJgTFUVswEQzbRox32qYK8W2KBCn",
+    "token1": "5GUfU2RbEPyGjvojUwoZua3L4X2FiYf213Lddvj3PgFYpAAL",
+    "reserves0": "1993375349255972651",
+    "reserves1": "3010000000000000000000",
+    "lastUpdateTimestamp": "1708125424000"
+  }
 }
 ```
 
 So `Map<PoolId, Pool>` - a mapping between pool's ID (address) and its last-known state.
-
 
 ### `GET /api/v1/pools/:poolId` - specific pool's reserves
 
@@ -193,11 +193,11 @@ Returns current reserves of a specific pool, identifier by `poolId`. Example res
 
 ```json
 {
-    "id": "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd",
-    "token0": "5E2xuRb3k5h4TdrPAK543TiFBdRvhWSTmz6qT6b1hfq6LA2U",
-    "token1": "5HKuP2yvvK2MXst7sgGnG715DqVifidEzwopunjKVtRNA1tf",
-    "reserves0": "4000000000000000000000",
-    "reserves1": "80000000000000000",
-    "lastUpdateTimestamp": "1703774256000"
+  "id": "5CanvcAQYZqJ4Qa3LUCqGJZhoa3cDPQxbV22y4DC6DdjXNEd",
+  "token0": "5E2xuRb3k5h4TdrPAK543TiFBdRvhWSTmz6qT6b1hfq6LA2U",
+  "token1": "5HKuP2yvvK2MXst7sgGnG715DqVifidEzwopunjKVtRNA1tf",
+  "reserves0": "4000000000000000000000",
+  "reserves1": "80000000000000000",
+  "lastUpdateTimestamp": "1703774256000"
 }
 ```
