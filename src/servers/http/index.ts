@@ -1,5 +1,6 @@
 import { TokenBalances } from "../../models/psp22";
 import { UsdPriceCache } from "../../services/usdPriceCache";
+import { Pools } from "../../models/pool";
 import express from "express";
 
 export function usdPriceEndpoints(
@@ -34,6 +35,24 @@ export function usdPriceEndpoints(
     usdcUsdPriceCache.getPrice().then((response) => {
       res.send(response);
     });
+  });
+}
+
+export function poolsV2Endpoints(app: express.Express, pools: Pools) {
+  app.get("/api/v1/pools", (_req, res) => {
+    const obj = Object.fromEntries(pools.pools);
+    // Not the same as `res.json` as that would escape the string
+    // which we don't want.
+    res.contentType("application/json").send(obj);
+  });
+
+  app.get("/api/v1/pools/:poolId", (req, res) => {
+    let pool = pools.pools.get(req.params.poolId);
+    if (pool === undefined) {
+      res.status(404).send("Pool not found");
+      return;
+    }
+    res.json(pool);
   });
 }
 
