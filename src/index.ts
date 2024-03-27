@@ -94,6 +94,10 @@ async function main(): Promise<void> {
         url: graphqlClientUrl,
       });
 
+      // TODO: handle GraphQL client connection.
+      pools.setGraphqlClient(graphqlClient);
+      rest.poolsSwapVolume(app, pools);
+
       loadInitPoolReserves(graphqlClient).then((initPools) => {
         pools.updateBatch(initPools);
       });
