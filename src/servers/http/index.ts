@@ -3,6 +3,8 @@ import { UsdPriceCache } from "../../services/usdPriceCache";
 import { Pools } from "../../models/pool";
 import express from "express";
 
+const addressRegex = /[\w\d]{48}/;
+
 export function usdPriceEndpoints(
   app: express.Express,
   azeroUsdPriceCache: UsdPriceCache,
@@ -47,6 +49,10 @@ export function poolsV2Endpoints(app: express.Express, pools: Pools) {
   });
 
   app.get("/api/v1/pools/:poolId", (req, res) => {
+    if (!addressRegex.test(req.params.poolId)) {
+      res.status(400).send("Invalid pool address");
+      return;
+    }
     let pool = pools.pools.get(req.params.poolId);
     if (pool === undefined) {
       res.status(404).send("Pool not found");
@@ -61,6 +67,10 @@ export function accountPsp22BalancesEndpoint(
   balances: TokenBalances,
 ) {
   app.get("/api/accounts/:accountId", (req, res) => {
+    if (!addressRegex.test(req.params.accountId)) {
+      res.status(400).send("Invalid account address");
+      return;
+    }
     let accountBalances = balances.balances.get(req.params.accountId);
     if (accountBalances === undefined) {
       res.status(404).send("Account not found");
@@ -74,6 +84,14 @@ export function accountPsp22BalancesEndpoint(
   });
 
   app.get("/api/accounts/:accountId/tokens/:token", (req, res) => {
+    if (!addressRegex.test(req.params.accountId)) {
+      res.status(400).send("Invalid account address");
+      return;
+    }
+    if (!addressRegex.test(req.params.token)) {
+      res.status(400).send("Invalid token address");
+      return;
+    }
     let accountBalances = balances.balances.get(req.params.accountId);
     if (accountBalances === undefined) {
       res.status(404).send("Account not found");
