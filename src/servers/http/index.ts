@@ -87,11 +87,11 @@ export async function poolsSwapVolume(app: express.Express, pools: Pools) {
     }
     const volume = await pools.poolSwapVolume(pool.id, fromMillis, toMillis);
     if (!volume) {
-      res.status(404).send("Volume not found");
+      res.status(404).send("Pool not found");
       return;
     }
     if (volume.pool !== pool.id) {
-      res.status(404).send("Volume not found");
+      res.status(404).send("Pool not found");
     }
 
     res.send({

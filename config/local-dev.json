@@ -9,7 +9,7 @@
   },
   "graphql": {
     "proto": "wss",
-    "host": "squid-graphql.dev.azero.dev",
+    "host": "indexer.dev.azero.dev",
     "port": 443
   }
 }
