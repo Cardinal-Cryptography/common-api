@@ -1,4 +1,6 @@
+import { Client } from "graphql-ws";
 import { TokenId } from "../shared";
+import { pairSwapVolume, pairsSwapVolumes } from "../grapqhl/pools";
 
 export interface PoolV2 {
   id: string;
@@ -9,8 +11,15 @@ export interface PoolV2 {
   lastUpdateTimestamp: bigint;
 }
 
+export interface PairSwapVolume {
+  pool: string;
+  amount0_in: bigint;
+  amount1_in: bigint;
+}
+
 export class Pools {
   pools: Map<string, PoolV2>;
+  graphqlClient: Client | undefined;
 
   constructor() {
     this.pools = new Map();
@@ -35,6 +44,33 @@ export class Pools {
 
   updateBatch(pools: PoolV2[]) {
     pools.forEach((pool) => this.update(pool));
+  }
+
+  async setGraphqlClient(client: Client) {
+    this.graphqlClient = client;
+  }
+
+  async poolSwapVolume(
+    poolId: string,
+    fromMillis: bigint,
+    toMillis: bigint,
+  ): Promise<PairSwapVolume | null> {
+    if (!this.graphqlClient) {
+      return null;
+    }
+    //TODO: round down to nearest hours
+    return pairSwapVolume(this.graphqlClient, poolId, fromMillis, toMillis);
+  }
+
+  async poolsSwapVolumes(
+    fromMillis: bigint,
+    toMillis: bigint,
+  ): Promise<PairSwapVolume[]> {
+    if (!this.graphqlClient) {
+      return [];
+    }
+    //TODO: round down to nearest hours
+    return pairsSwapVolumes(this.graphqlClient, fromMillis, toMillis);
   }
 
   public toString(): string {
