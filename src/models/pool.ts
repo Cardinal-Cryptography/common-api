@@ -77,8 +77,15 @@ export class Pools {
     if (!this.graphqlClient) {
       return [];
     }
-    //TODO: round down to nearest hours
-    return pairsSwapVolumes(this.graphqlClient, fromMillis, toMillis);
+    // We want to query the volumes for the nearest minut.
+    // This way we can leverage GraphQL caching functionality.
+    const fromNearestMinute = (fromMillis / 60000n) * 60000n;
+    const toNearestMinute = (toMillis / 60000n) * 60000n;
+    return pairsSwapVolumes(
+      this.graphqlClient,
+      fromNearestMinute,
+      toNearestMinute,
+    );
   }
 
   public toString(): string {
