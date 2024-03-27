@@ -48,6 +48,7 @@ HTTP server, currently, supports the following endpoints:
 - `GET /api/v1/accounts/:accountId/tokens/:token` returns a balance of `:token` under `:accountId`
 - `GET /api/v1/pools` returns reserves of all indexed pools.
 - `GET /api/v1/pools/:poolId` returns reserves of a specific pool
+- `GET /api/v1/pools/:poolId/volume?from={from}&to={to}` - returns swaps volume for the `poolId` and requested period.
 
 ## Configuration
 
@@ -199,5 +200,21 @@ Returns current reserves of a specific pool, identifier by `poolId`. Example res
   "reserves0": "4000000000000000000000",
   "reserves1": "80000000000000000",
   "lastUpdateTimestamp": "1703774256000"
+}
+```
+
+### `GET /api/v1/pools/:poolId/volume?from={from}&to={to}` - pool's swap volume
+
+Returns swap volume starting from `{from}` until `{to}` (both argument expected to be milliseconds). The server rounds them down to the nearest minute so that we can levarage GraphQL server's caching.
+
+Example response:
+
+```json
+{
+  "pool": "5Ek4Z1rkEx8aS1oRTekEZ3MtDseurx4ZQV8v56YE6Bj8BqMp",
+  "fromMillis": "1",
+  "toMillis": "1704294000100",
+  "amount0_in": 15000000000000,
+  "amount1_in": 0
 }
 ```
