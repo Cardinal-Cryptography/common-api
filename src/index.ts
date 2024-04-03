@@ -36,6 +36,7 @@ async function main(): Promise<void> {
 
   let pools = new Pools();
   rest.poolsV2Endpoints(app, pools);
+  rest.healthcheckEnpoint(app, config);
 
   if (config.enablePriceCache) {
     console.log("USD price cache enabled");
