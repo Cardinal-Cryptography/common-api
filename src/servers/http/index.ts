@@ -2,8 +2,20 @@ import { TokenBalances } from "../../models/psp22";
 import { UsdPriceCache } from "../../services/usdPriceCache";
 import { Pools } from "../../models/pool";
 import express from "express";
+import { Config } from "../../config";
 
 const addressRegex = /[\w\d]{48}/;
+
+export function healthcheckEnpoint(app: express.Express, config: Config) {
+  app.get("/health", (_req, res) => {
+    const status = {
+      priceCacheEnabled: config.enablePriceCache,
+      demoModeEnabled: config.enableDemoMode,
+      graphqlUpdatesEnabled: config.enableGraphql,
+    };
+    res.send(status);
+  });
+}
 
 export function usdPriceEndpoints(
   app: express.Express,

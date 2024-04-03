@@ -218,3 +218,16 @@ Example response:
   "amount1_in": 0
 }
 ```
+
+### `GET /health` - health check endpoint
+
+Returns basic information about the Common API configuration.
+
+Response format:
+```json
+{
+      priceCacheEnabled: <boolean>,
+      demoModeEnabled: <boolean>,
+      graphqlUpdatesEnabled: <boolean>,
+    }
+```
