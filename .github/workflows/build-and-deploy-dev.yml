@@ -1,0 +1,27 @@
+name: Build and push docker image
+
+on:
+  push:
+    paths-ignore:
+      - "*.md"
+    branches:
+      - main
+      - CMN-477-deploy-dev #! remove before merge
+  workflow_dispatch:
+
+jobs:
+  build_and_push:
+    name: Build and push common-api
+    runs-on: ubuntu-20.04
+    steps:
+      - name: GIT | Checkout
+        uses: actions/checkout@v2
+
+      - name: DOCKER | Build and push
+        uses: ./.github/actions/build-and-push
+        id: build_common_api
+        with:
+          aws_resources_ecr_access_key_id: ${{ secrets.AWS_RESOURCES_ECR_ACCESS_KEY_ID }}
+          aws_resources_ecr_access_key: ${{ secrets.AWS_RESOURCES_ECR_ACCESS_KEY }}
+    outputs:
+      image_tag: ${{ steps.build_processor.outputs.image_tag }}
