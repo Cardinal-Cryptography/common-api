@@ -1,5 +1,6 @@
 import { createClient } from "graphql-ws";
 import WebSocket, { WebSocketServer } from "ws";
+import cors from "cors";
 import http from "http";
 import express from "express";
 
@@ -23,6 +24,15 @@ import { share } from "rxjs";
 
 async function main(): Promise<void> {
   const app = express();
+  app.use(cors({
+    origin: [
+      /\.common\.fi$/, // mainnet, testnet
+      /\.azero\.dev$/, // devnet, branch previews
+      /\.d15umvvtx19run\.amplifyapp\.com$/, // AWS amplify previews
+      /^http:\/\/localhost:[0-9]*$/, // local development
+      /^http:\/\/127\.0\.0\.1:[0-9]*$/, // local development
+    ],
+  }));
   const server = http.createServer(app);
   const config = new Config();
 
