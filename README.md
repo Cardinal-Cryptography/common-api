@@ -25,9 +25,9 @@ Currently does the following:
 
 1. GraphQL client controlled with three env variables:
 
-- `COMMON_API_GQL_PROTO` - defaults to `ws`
-- `COMMON_API_GQL_HOST` - defaults to `localhost`
-- `COMMON_API_GQL_PORT` - defaults to `4351`
+- `COMMON_API_GRAPHQL_PROTO` - defaults to `ws`
+- `COMMON_API_GRAPHQL_HOST` - defaults to `localhost`
+- `COMMON_API_GRAPHQL_PORT` - defaults to `4351`
 
 Subscription can be turned off by setting env `COMMON_API_ENABLE_GRAPHQL=false`.
 
