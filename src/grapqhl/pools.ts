@@ -45,8 +45,12 @@ export async function pairSwapVolume(
   poolId: string,
   fromMillis: bigint,
   toMillis: bigint,
-): Promise<PairSwapVolume | null> {
-  let volume: PairSwapVolume | null = null;
+): Promise<PairSwapVolume> {
+  let volume: PairSwapVolume = {
+    pool: poolId,
+    amount0_in: 0n,
+    amount1_in: 0n,
+  };
   const query = client.iterate({
     query: pairSwapVolumeQuery(poolId, fromMillis, toMillis),
   });
