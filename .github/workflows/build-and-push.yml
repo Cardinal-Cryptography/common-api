@@ -6,7 +6,6 @@ on:
       - "*.md"
     branches:
       - main
-      - CMN-477-deploy-dev #! remove before merge
   workflow_dispatch:
 
 jobs:
