@@ -48,8 +48,9 @@ export async function pairSwapVolume(
 ): Promise<PairSwapVolume> {
   let volume: PairSwapVolume = {
     pool: poolId,
-    amount0_in: 0n,
-    amount1_in: 0n,
+    // can't do 0n b/c it breaks in runtime with serialization error.
+    amount0_in: 0 as unknown as bigint,
+    amount1_in: 0 as unknown as bigint,
   };
   const query = client.iterate({
     query: pairSwapVolumeQuery(poolId, fromMillis, toMillis),
