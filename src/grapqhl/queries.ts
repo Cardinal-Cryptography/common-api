@@ -4,13 +4,13 @@ import { SubscriptionQuery } from "./subscription";
 export const psp22TokenBalancesConnectionsQuery: ConnectionQuery =
   new ConnectionQuery(
     "psp22TokenBalances",
-    "account amount token lastUpdateBlockHeight lastUpdateTimestamp id",
+    "account amount token blockHeight blockTimestamp id",
   );
 
 export const pspTokenBalancesSubscriptionQuery: SubscriptionQuery =
   new SubscriptionQuery(
     "psp22TokenBalances",
-    "account amount token lastUpdateBlockHeight lastUpdateTimestamp",
+    "account amount token blockHeight blockTimestamp",
   );
 
 export const nativeTransfersSubscriptionQuery: SubscriptionQuery =
@@ -24,12 +24,12 @@ export const nativeTransfersSubscriptionQuery: SubscriptionQuery =
 export const poolsV2SubscriptionQuery: SubscriptionQuery =
   new SubscriptionQuery(
     "pools",
-    "id token0 token1 reserves0 reserves1 lastUpdateTimestamp",
+    "id token0 token1 reserves0 reserves1 blockTimestamp",
     50,
-    "lastUpdateTimestamp_ASC",
+    "blockTimestamp_ASC",
   );
 
 export const poolsV2ConnectionsQuery: ConnectionQuery = new ConnectionQuery(
   "pools",
-  "id token0 token1 reserves0 reserves1 lastUpdateTimestamp",
+  "id token0 token1 reserves0 reserves1 blockTimestamp",
 );
