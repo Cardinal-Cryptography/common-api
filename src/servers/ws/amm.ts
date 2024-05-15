@@ -13,13 +13,13 @@ export function setupPoolsV2OverWs(
         console.log("error sending known state", error);
       }
     });
+
     const subscription = pools.subscribe((pool) => {
-      ws.send(JSON.stringify(pool), function () {
-        //
-        // Ignore errors.
-        //
+      ws.send(JSON.stringify(pool), function (err) {
+        console.error(`Error when sending data to the client over WS: ${err}`);
       });
     });
+
     console.log("started feeding new client the pools events");
 
     ws.on("error", console.error);
