@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-RUN apk add bash curl git
+RUN apk add bash curl
 
 WORKDIR /common-api
 COPY . .
