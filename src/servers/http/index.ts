@@ -5,6 +5,10 @@ import express from "express";
 import { Config } from "../../config";
 
 const addressRegex = /[\w\d]{48}/;
+const sha = require("child_process")
+  .execSync("git rev-parse --short HEAD")
+  .toString()
+  .trim();
 
 export function healthcheckEnpoint(app: express.Express, config: Config) {
   app.get("/health", (_req, res) => {
@@ -12,6 +16,7 @@ export function healthcheckEnpoint(app: express.Express, config: Config) {
       priceCacheEnabled: config.enablePriceCache,
       demoModeEnabled: config.enableDemoMode,
       graphqlUpdatesEnabled: config.enableGraphql,
+      sha: sha,
     };
     res.send(status);
   });
