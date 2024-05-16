@@ -1,5 +1,5 @@
-import { ConnectionQuery } from "./connection";
-import { SubscriptionQuery } from "./subscription";
+import { ConnectionQuery } from "../connection";
+import { SubscriptionQuery } from "../subscription";
 
 export const psp22TokenBalancesConnectionsQuery: ConnectionQuery =
   new ConnectionQuery(

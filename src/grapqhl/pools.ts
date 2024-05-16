@@ -2,7 +2,8 @@ import { Client } from "graphql-ws";
 import { RawElement, readWholeConnection } from ".";
 import { PairSwapVolume, PoolV2 } from "../models/pool";
 import { Observable, mergeMap } from "rxjs";
-import { poolsV2ConnectionsQuery } from "./queries";
+import { poolsV2ConnectionsQuery as poolReservesV2 } from "./v2/queries";
+import { poolsV2ConnectionsQuery as poolReservesV1 } from "./v1/queries";
 
 export function poolsV2$(
   rawObservable: Observable<RawElement>,
@@ -13,7 +14,17 @@ export function poolsV2$(
 }
 
 export function loadInitPoolReserves(client: Client): Promise<PoolV2[]> {
-  return readWholeConnection<PoolV2>(client, poolsV2ConnectionsQuery);
+  const v1 = loadInitReservesV1(client);
+  const v2 = loadInitReservesV2(client);
+  return Promise.all([v1, v2]).then((values) => values.flat());
+}
+
+export function loadInitReservesV1(client: Client): Promise<PoolV2[]> {
+  return readWholeConnection<PoolV2>(client, poolReservesV1);
+}
+
+export function loadInitReservesV2(client: Client): Promise<PoolV2[]> {
+  return readWholeConnection<PoolV2>(client, poolReservesV2);
 }
 
 /// Query all pair swap volumes from the GraphQL server.

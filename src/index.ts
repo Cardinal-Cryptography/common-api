@@ -5,34 +5,31 @@ import http from "http";
 import express from "express";
 
 import { Config } from "./config";
-import { tokenBalances$, loadInitBalances } from "./grapqhl/psp22";
 import * as rest from "./servers/http";
-import { graphqlSubscribe$ } from "./grapqhl";
-import {
-  pspTokenBalancesSubscriptionQuery,
-  nativeTransfersSubscriptionQuery,
-  poolsV2SubscriptionQuery,
-} from "./grapqhl/queries";
-import { setupNativeTransfersOverWss } from "./servers/ws/nativeTransfers";
+import { graphqlSubscribe$, RawElement } from "./grapqhl";
+import { poolsV2SubscriptionQuery as v2PoolSubscriptionQuery } from "./grapqhl/v2/queries";
+import { poolsV2SubscriptionQuery as v1PoolSubscriptionQuery } from "./grapqhl/v1/queries";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
-import { nativeTransfers$ } from "./grapqhl/nativeTransfers";
 import { UsdPriceCache } from "./services/usdPriceCache";
 import { loadInitPoolReserves, poolsV2$ } from "./grapqhl/pools";
 import { poolDataSample$ } from "./mocks/pools";
 import { Pools } from "./models/pool";
-import { share } from "rxjs";
+import { merge, Observable, share } from "rxjs";
+import { isV2GraphQLReservesError, isV1GraphQLReservesError } from "./utils";
 
 async function main(): Promise<void> {
   const app = express();
-  app.use(cors({
-    origin: [
-      /\.common\.fi$/, // mainnet, testnet
-      /\.azero\.dev$/, // devnet, branch previews
-      /\.d15umvvtx19run\.amplifyapp\.com$/, // AWS amplify previews
-      /^http:\/\/localhost:[0-9]*$/, // local development
-      /^http:\/\/127\.0\.0\.1:[0-9]*$/, // local development
-    ],
-  }));
+  app.use(
+    cors({
+      origin: [
+        /\.common\.fi$/, // mainnet, testnet
+        /\.azero\.dev$/, // devnet, branch previews
+        /\.d15umvvtx19run\.amplifyapp\.com$/, // AWS amplify previews
+        /^http:\/\/localhost:[0-9]*$/, // local development
+        /^http:\/\/127\.0\.0\.1:[0-9]*$/, // local development
+      ],
+    }),
+  );
   const server = http.createServer(app);
   const config = new Config();
 
@@ -113,14 +110,39 @@ async function main(): Promise<void> {
         pools.updateBatch(initPools);
       });
 
-      let graphqlPoolV2$ = graphqlSubscribe$(
+      // It's safe to run both subscriptions since one of them is bound to fail.
+      new Observable<RawElement>((_observer) => {});
+      new Observable<RawElement>((_observer) => {});
+
+      let v2graphqlPoolV2$ = graphqlSubscribe$(
         graphqlClient,
-        poolsV2SubscriptionQuery,
+        v2PoolSubscriptionQuery,
       );
 
-      let poolsV2Updates$ = poolsV2$(graphqlPoolV2$).pipe(share());
+      let v1graphqlPoolV1$ = graphqlSubscribe$(
+        graphqlClient,
+        v1PoolSubscriptionQuery,
+      );
 
-      poolsV2Updates$.forEach((pool) => pools.update(pool));
+      // Share the observable to enable multiple subscriptions (forEach and setupPoolsV2OverWs).
+      let v2poolsV2Updates$ = poolsV2$(v2graphqlPoolV2$).pipe(share());
+      let v1poolsV2Updates$ = poolsV2$(v1graphqlPoolV1$).pipe(share());
+
+      let poolsV2Updates$ = merge(v1poolsV2Updates$, v2poolsV2Updates$);
+
+      poolsV2Updates$
+        .forEach((pool) => pools.update(pool))
+        .catch((err) => {
+          // We expect certain types of errors to happen b/c of the migration.
+          // Anything else should be a fatal error.
+          if (
+            !isV2GraphQLReservesError(err) &&
+            !isV1GraphQLReservesError(err)
+          ) {
+            console.error("Error updating pools", err);
+            Promise.reject(err);
+          }
+        });
       setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
 
       // let initBalances = tokenBalancesFromArray(

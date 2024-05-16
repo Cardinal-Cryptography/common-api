@@ -41,7 +41,6 @@ export async function readWholeConnection<T>(
         }
       }
     } catch (err) {
-      // TODO: throw error?
       console.error(err);
       break;
     }
