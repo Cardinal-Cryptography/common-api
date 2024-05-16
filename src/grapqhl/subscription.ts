@@ -8,7 +8,7 @@ export class SubscriptionQuery {
     nodeKey: string,
     nodeDesc: string,
     limit: number = 50,
-    orderBy: string = "lastUpdateTimestamp_ASC",
+    orderBy: string = "blockTimestamp_ASC",
   ) {
     this.orderBy = orderBy;
     this.limit = limit;
