@@ -4,6 +4,8 @@ import { Observable } from "rxjs";
 import { Connection, ConnectionQuery } from "./connection";
 import { SubscriptionQuery } from "./subscription";
 
+import { log } from "../index";
+
 /**
  * Executes GraphQL connection query that iterates over the paginated results.
  *
@@ -41,7 +43,7 @@ export async function readWholeConnection<T>(
         }
       }
     } catch (err) {
-      console.error(err);
+      log.error(err);
       break;
     }
   }

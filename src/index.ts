@@ -10,14 +10,23 @@ import { graphqlSubscribe$, RawElement } from "./grapqhl";
 import { poolsV2SubscriptionQuery as v2PoolSubscriptionQuery } from "./grapqhl/v2/queries";
 import { poolsV2SubscriptionQuery as v1PoolSubscriptionQuery } from "./grapqhl/v1/queries";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
-import { UsdPriceCache } from "./services/usdPriceCache";
+import { UsdPriceCache } from "./services/coingeckoPriceCache";
 import { loadInitPoolReserves, poolsV2$ } from "./grapqhl/pools";
 import { poolDataSample$ } from "./mocks/pools";
 import { Pools } from "./models/pool";
 import { merge, Observable, share } from "rxjs";
 import { isV2GraphQLReservesError, isV1GraphQLReservesError } from "./utils";
 
+import { Logger, ILogObj } from "tslog";
+
+export const log: Logger<ILogObj> = new Logger({
+  prettyLogTemplate:
+    "{{logLevelName}}\t{{yyyy}}.{{mm}}.{{dd}} {{hh}}:{{MM}}:{{ss}}:{{ms}}\t[{{filePathWithLine}}{{name}}]\t",
+});
+
 async function main(): Promise<void> {
+  log.info("Starting Common API server");
+
   const app = express();
   app.use(
     cors({
@@ -33,12 +42,8 @@ async function main(): Promise<void> {
   const server = http.createServer(app);
   const config = new Config();
 
-  console.log("Starting Common API server");
-
   server.listen(config.http.port, () => {
-    console.log(
-      `HTTP server listening at http://localhost:${config.http.port}`,
-    );
+    log.info(`HTTP server listening at http://localhost:${config.http.port}`);
   });
 
   let pools = new Pools();
@@ -46,7 +51,7 @@ async function main(): Promise<void> {
   rest.healthcheckEnpoint(app, config);
 
   if (config.enablePriceCache) {
-    console.log("USD price cache enabled");
+    log.info("USD price cache enabled");
 
     const azeroUsdPriceCache = new UsdPriceCache(
       "aleph-zero",
@@ -81,21 +86,21 @@ async function main(): Promise<void> {
 
   if (config.enableDemoMode || config.enableGraphql) {
     const wsServer = new WebSocketServer(config.ws, () => {
-      console.log(
+      log.info(
         `WS server listening at ws://${config.ws.host}:${config.ws.port}`,
       );
     });
 
     if (config.enableDemoMode) {
-      console.log("Running in demo mode");
+      log.info("Running in demo mode");
       const source = poolDataSample$.pipe(share());
       source.forEach((pool) => pools.update(pool));
       setupPoolsV2OverWs(wsServer, source, pools);
     } else if (config.enableGraphql) {
       const graphqlClientUrl = `${config.graphql.proto}://${config.graphql.host}:${config.graphql.port}/graphql`;
 
-      console.log("Enabling updates over GraphQL/WS");
-      console.log(`Connecting Graphql client to ${graphqlClientUrl}`);
+      log.info("Enabling updates over GraphQL/WS");
+      log.info(`Connecting Graphql client to ${graphqlClientUrl}`);
 
       const graphqlClient = createClient({
         webSocketImpl: WebSocket,
@@ -139,7 +144,7 @@ async function main(): Promise<void> {
             !isV2GraphQLReservesError(err) &&
             !isV1GraphQLReservesError(err)
           ) {
-            console.error("Error updating pools", err);
+            log.error("Error updating pools", err);
             Promise.reject(err);
           }
         });
@@ -171,7 +176,7 @@ async function main(): Promise<void> {
       // );
     }
   } else {
-    console.log("Updates over GraphQL/WS are disabled.");
+    log.info("Updates over GraphQL/WS are disabled.");
   }
 }
 
