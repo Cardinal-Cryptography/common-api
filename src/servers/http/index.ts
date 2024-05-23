@@ -80,11 +80,7 @@ export async function poolsSwapVolume(app: express.Express, pools: Pools) {
       res.status(400).send("Invalid pool address");
       return;
     }
-    let pool = pools.pools.get(req.params.poolId);
-    if (pool === undefined) {
-      res.status(404).send("Pool not found");
-      return;
-    }
+    let poolId = req.params.poolId;
     let fromQuery = req.query.from;
     let toQuery = req.query.to;
     if (fromQuery === undefined || toQuery === undefined) {
@@ -97,17 +93,17 @@ export async function poolsSwapVolume(app: express.Express, pools: Pools) {
       res.status(400).send("from and to query parameters must be positive");
       return;
     }
-    const volume = await pools.poolSwapVolume(pool.id, fromMillis, toMillis);
+    const volume = await pools.poolSwapVolume(poolId, fromMillis, toMillis);
     if (!volume) {
       res.status(404).send("Pool not found");
       return;
     }
-    if (volume.pool !== pool.id) {
+    if (volume.pool !== poolId) {
       res.status(404).send("Pool not found");
     }
 
     res.send({
-      pool: pool.id,
+      pool: poolId,
       fromMillis: fromQuery,
       toMillis: toQuery,
       amount0_in: volume.amount0_in,
