@@ -1,5 +1,5 @@
 import { TokenBalances } from "../../models/psp22";
-import { UsdPriceCache } from "../../services/usdPriceCache";
+import { UsdPriceCache } from "../../services/coingeckoPriceCache";
 import { Pools } from "../../models/pool";
 import express from "express";
 import { Config } from "../../config";

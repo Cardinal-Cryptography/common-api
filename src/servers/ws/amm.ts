@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 import { WebSocketServer } from "ws";
 import { Pools, PoolV2 } from "../../models/pool";
+import { log } from "../../index";
 
 export function setupPoolsV2OverWs(
   wssServer: WebSocketServer,
@@ -9,29 +10,29 @@ export function setupPoolsV2OverWs(
 ) {
   wssServer.on("connection", (ws, request) => {
     ws.send(JSON.stringify(Object.fromEntries(knownState.pools)), (error) => {
-      if (error) {
-        console.log("error sending known state", error);
-      }
+      log.error("error sending known state", error);
     });
 
     const subscription = pools.subscribe((pool) => {
-      ws.send(JSON.stringify(pool), function (err) {
-        console.error(`Error when sending data to the client over WS: ${err}`);
+      ws.send(JSON.stringify(pool), (error) => {
+        log.error("error when sending data to the client over WS", error);
       });
     });
 
-    console.log("started feeding new client the pools events");
+    log.trace("started feeding new client the pools events");
 
-    ws.on("error", console.error);
+    ws.on("error", (error) => {
+      log.error("error on the websocket connection", error);
+    });
 
-    ws.on("message", function (message) {
-      console.log(
-        `Received message ${message} from user ${JSON.stringify(request)}`,
+    ws.on("message", (message) => {
+      log.trace(
+        `received message ${message} from user ${JSON.stringify(request)}`,
       );
     });
 
     ws.on("close", function () {
-      console.log("stopping client subscription");
+      log.info("stopping client subscription");
       subscription.unsubscribe();
     });
   });

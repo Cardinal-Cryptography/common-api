@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { UsdTokenPrice } from "../models/usdTokenPrice";
+import { log } from "../index";
 
 export class UsdPriceCache {
   ticker: string;
@@ -34,13 +35,13 @@ export class UsdPriceCache {
           lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       } else if (response.status == 429) {
-        console.log("Rate limited, returning cached price");
+        log.warn("Rate limited, returning cached price");
         return {
           price: this.price,
           lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       } else {
-        console.error(
+        log.error(
           `Unhandled status when fetching ${this.ticker} price`,
           response,
         );
@@ -50,7 +51,7 @@ export class UsdPriceCache {
         };
       }
     } catch (e) {
-      console.error(`Error fetching ${this.ticker} price`, e);
+      log.warn(`Error fetching ticker's price`, {ticker: this.ticker, error: e});
       return {
         price: this.price,
         lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
