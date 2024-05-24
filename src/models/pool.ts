@@ -46,10 +46,7 @@ export class Pools {
   }
 
   updateBatch(pools: PoolV2[]) {
-    pools.forEach((pool) => {
-      console.log("pool: " + JSON.stringify(pool))
-      this.update(pool)
-    });
+    pools.forEach((pool) => this.update(pool));
   }
 
   async setGraphqlClient(client: Client) {
