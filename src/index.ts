@@ -1,4 +1,4 @@
-import { createClient } from "graphql-ws";
+import { Client, createClient } from "graphql-ws";
 import WebSocket, { WebSocketServer } from "ws";
 import cors from "cors";
 import http from "http";
@@ -11,11 +11,27 @@ import { poolsV2SubscriptionQuery as v2PoolSubscriptionQuery } from "./grapqhl/v
 import { poolsV2SubscriptionQuery as v1PoolSubscriptionQuery } from "./grapqhl/v1/queries";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { UsdPriceCache } from "./services/coingeckoPriceCache";
-import { loadInitPoolReserves, poolsV2$ } from "./grapqhl/pools";
+import { loadInitReservesV1, loadInitReservesV2, poolsV2$ } from "./grapqhl/pools";
 import { poolDataSample$ } from "./mocks/pools";
-import { Pools } from "./models/pool";
-import { merge, Observable, share } from "rxjs";
-import { isV2GraphQLReservesError, isV1GraphQLReservesError } from "./utils";
+import { Pools, PoolV2 } from "./models/pool";
+import { Observable, share } from "rxjs";
+import { SubscriptionQuery } from "./grapqhl/subscription";
+
+function updatePools(graphqlClient: Client, pools: Pools, subscriptionQuery: SubscriptionQuery): Observable<PoolV2> {
+  let graphqlPoolV2$ = graphqlSubscribe$(
+    graphqlClient,
+    subscriptionQuery,
+  );
+
+  // Share the observable to enable multiple subscriptions (forEach and setupPoolsV2OverWs).
+  let poolsV2Updates$ = poolsV2$(graphqlPoolV2$).pipe(share());
+
+  poolsV2Updates$.forEach((pool) => {
+    console.log("Updated " + pool.id)
+    pools.update(pool)
+  })
+  return poolsV2Updates$
+}
 
 import { Logger, ILogObj } from "tslog";
 
@@ -111,44 +127,27 @@ async function main(): Promise<void> {
       pools.setGraphqlClient(graphqlClient);
       rest.poolsSwapVolume(app, pools);
 
-      loadInitPoolReserves(graphqlClient).then((initPools) => {
-        pools.updateBatch(initPools);
-      });
+      // Try loading initial pool reserves using query of type v1. If the updates are empty,
+      // try using the v2 query types.
+      const useV1Subscription = await loadInitReservesV1(graphqlClient).then((initPools) => {
+        pools.updateBatch(initPools)
+        return initPools.length > 0
+      })
 
-      // It's safe to run both subscriptions since one of them is bound to fail.
-      new Observable<RawElement>((_observer) => {});
-      new Observable<RawElement>((_observer) => {});
+      if (useV1Subscription) {
+        console.log("Proceeding with v1 subscription query on pool updates")
+        let poolsV2Updates$ = updatePools(graphqlClient, pools, v1PoolSubscriptionQuery)
+        setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
+      }
+      else {
+        await loadInitReservesV2(graphqlClient).then((initPools) => {
+          pools.updateBatch(initPools)
+        })
 
-      let v2graphqlPoolV2$ = graphqlSubscribe$(
-        graphqlClient,
-        v2PoolSubscriptionQuery,
-      );
-
-      let v1graphqlPoolV1$ = graphqlSubscribe$(
-        graphqlClient,
-        v1PoolSubscriptionQuery,
-      );
-
-      // Share the observable to enable multiple subscriptions (forEach and setupPoolsV2OverWs).
-      let v2poolsV2Updates$ = poolsV2$(v2graphqlPoolV2$).pipe(share());
-      let v1poolsV2Updates$ = poolsV2$(v1graphqlPoolV1$).pipe(share());
-
-      let poolsV2Updates$ = merge(v1poolsV2Updates$, v2poolsV2Updates$);
-
-      poolsV2Updates$
-        .forEach((pool) => pools.update(pool))
-        .catch((err) => {
-          // We expect certain types of errors to happen b/c of the migration.
-          // Anything else should be a fatal error.
-          if (
-            !isV2GraphQLReservesError(err) &&
-            !isV1GraphQLReservesError(err)
-          ) {
-            log.error("Error updating pools", err);
-            Promise.reject(err);
-          }
-        });
-      setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
+        console.log("Proceeding with v2 subscription query on pool updates")
+        let poolsV2Updates$ = updatePools(graphqlClient, pools, v2PoolSubscriptionQuery)
+        setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
+      }
 
       // let initBalances = tokenBalancesFromArray(
       //   await loadInitBalances(graphqlClient),

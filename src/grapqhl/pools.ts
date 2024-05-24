@@ -13,12 +13,6 @@ export function poolsV2$(
   );
 }
 
-export function loadInitPoolReserves(client: Client): Promise<PoolV2[]> {
-  const v1 = loadInitReservesV1(client);
-  const v2 = loadInitReservesV2(client);
-  return Promise.all([v1, v2]).then((values) => values.flat());
-}
-
 export function loadInitReservesV1(client: Client): Promise<PoolV2[]> {
   return readWholeConnection<PoolV2>(client, poolReservesV1);
 }
