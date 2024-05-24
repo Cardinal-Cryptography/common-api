@@ -132,7 +132,7 @@ async function main(): Promise<void> {
       })
 
       if (useV1Subscription) {
-        console.log("Proceeding with v1 subscription query on pool updates")
+        log.info("Proceeding with v1 subscription query on pool updates")
         let poolsV2Updates$ = updatePools(graphqlClient, pools, v1PoolSubscriptionQuery)
         setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
       }
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
           pools.updateBatch(initPools)
         })
 
-        console.log("Proceeding with v2 subscription query on pool updates")
+        log.info("Proceeding with v2 subscription query on pool updates")
         let poolsV2Updates$ = updatePools(graphqlClient, pools, v2PoolSubscriptionQuery)
         setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
       }
