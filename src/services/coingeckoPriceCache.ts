@@ -51,7 +51,7 @@ export class UsdPriceCache {
         };
       }
     } catch (e) {
-      log.warn(`Error fetching ticker's price`, {ticker: this.ticker, error: e});
+      log.trace(`Error fetching ticker's price`, {ticker: this.ticker, error: e});
       return {
         price: this.price,
         lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
