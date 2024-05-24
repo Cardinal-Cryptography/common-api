@@ -41,17 +41,16 @@ export class UsdPriceCache {
           lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       } else {
-        log.error(
-          `Unhandled status when fetching ${this.ticker} price`,
-          response,
-        );
+        log.warn(`Unhandled status when fetching ${this.ticker} price`, {
+          response: response.data,
+        });
         return {
           price: this.price,
           lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
         };
       }
     } catch (e) {
-      log.trace(`Error fetching ticker's price`, {ticker: this.ticker, error: e});
+      log.warn(`Error fetching ticker's price`, { ticker: this.ticker });
       return {
         price: this.price,
         lastUpdateTimestampSeconds: this.lastUpdateTimestampSeconds,
