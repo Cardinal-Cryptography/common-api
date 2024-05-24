@@ -17,7 +17,7 @@ export const nativeTransfersSubscriptionQuery: SubscriptionQuery =
   new SubscriptionQuery(
     "nativeTransfers",
     "extrinsicHash sender recipient amount blockNumber timestamp",
-    50,
+    200,
     "timestamp_ASC",
   );
 
@@ -25,7 +25,7 @@ export const poolsV2SubscriptionQuery: SubscriptionQuery =
   new SubscriptionQuery(
     "pools",
     "id token0 token1 reserves0 reserves1 lastUpdateTimestamp",
-    50,
+    200,
     "lastUpdateTimestamp_ASC",
   );
 
