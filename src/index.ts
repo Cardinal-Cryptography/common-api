@@ -26,10 +26,7 @@ function updatePools(graphqlClient: Client, pools: Pools, subscriptionQuery: Sub
   // Share the observable to enable multiple subscriptions (forEach and setupPoolsV2OverWs).
   let poolsV2Updates$ = poolsV2$(graphqlPoolV2$).pipe(share());
 
-  poolsV2Updates$.forEach((pool) => {
-    console.log("Updated " + pool.id)
-    pools.update(pool)
-  })
+  poolsV2Updates$.forEach((pool) => pools.update(pool))
   return poolsV2Updates$
 }
 
