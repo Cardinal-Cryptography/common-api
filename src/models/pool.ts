@@ -33,15 +33,15 @@ export class Pools {
 
   update(newPool: PoolV2) {
     // TODO remove this hack when there are no longer 2 versions of subscription query
-    newPool = fixBrokenPoolV2(newPool)
+    newPool = fixBrokenPoolV2(newPool);
 
-    let pool = this.pools.get(newPool.id)
+    let pool = this.pools.get(newPool.id);
     if (pool === undefined) {
-      this.pools.set(newPool.id, newPool)
-      return
+      this.pools.set(newPool.id, newPool);
+      return;
     }
     if (pool.lastUpdateTimestamp < newPool.lastUpdateTimestamp) {
-      this.pools.set(newPool.id, newPool)
+      this.pools.set(newPool.id, newPool);
     }
   }
 
@@ -113,7 +113,7 @@ export function poolsV2FromArray(pools: PoolV2[]): Pools {
 // it is possible. This function "fixes" the `PoolV2` by returning a proper object of type `PoolV2`
 // which doesn't contain `blockTimestamp` but contains `lastUpdateTimestamp` instead.
 function fixBrokenPoolV2(pool: any): PoolV2 {
-  if (pool['blockTimestamp']) {
+  if (pool["blockTimestamp"]) {
     return {
       id: pool.id,
       token0: pool.token0,
@@ -121,7 +121,7 @@ function fixBrokenPoolV2(pool: any): PoolV2 {
       reserves0: pool.reserves0,
       reserves1: pool.reserves1,
       lastUpdateTimestamp: pool.blockTimestamp,
-    }
+    };
   }
-  return pool as PoolV2
+  return pool as PoolV2;
 }
