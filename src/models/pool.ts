@@ -113,7 +113,7 @@ export function poolsV2FromArray(pools: PoolV2[]): Pools {
 // it is possible. This function "fixes" the `PoolV2` by returning a proper object of type `PoolV2`
 // which doesn't contain `blockTimestamp` but contains `lastUpdateTimestamp` instead.
 function fixBrokenPoolV2(pool: any): PoolV2 {
-  if (pool.hasOwnProperty('blockTimestamp')) {
+  if (pool['blockTimestamp']) {
     return {
       id: pool.id,
       token0: pool.token0,
