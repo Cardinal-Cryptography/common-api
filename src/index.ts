@@ -11,23 +11,28 @@ import { poolsV2SubscriptionQuery as v2PoolSubscriptionQuery } from "./grapqhl/v
 import { poolsV2SubscriptionQuery as v1PoolSubscriptionQuery } from "./grapqhl/v1/queries";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { UsdPriceCache } from "./services/coingeckoPriceCache";
-import { loadInitReservesV1, loadInitReservesV2, poolsV2$ } from "./grapqhl/pools";
+import {
+  loadInitReservesV1,
+  loadInitReservesV2,
+  poolsV2$,
+} from "./grapqhl/pools";
 import { poolDataSample$ } from "./mocks/pools";
 import { Pools, PoolV2 } from "./models/pool";
 import { Observable, share } from "rxjs";
 import { SubscriptionQuery } from "./grapqhl/subscription";
 
-function updatePools(graphqlClient: Client, pools: Pools, subscriptionQuery: SubscriptionQuery): Observable<PoolV2> {
-  let graphqlPoolV2$ = graphqlSubscribe$(
-    graphqlClient,
-    subscriptionQuery,
-  );
+function updatePools(
+  graphqlClient: Client,
+  pools: Pools,
+  subscriptionQuery: SubscriptionQuery,
+): Observable<PoolV2> {
+  let graphqlPoolV2$ = graphqlSubscribe$(graphqlClient, subscriptionQuery);
 
   // Share the observable to enable multiple subscriptions (forEach and setupPoolsV2OverWs).
   let poolsV2Updates$ = poolsV2$(graphqlPoolV2$).pipe(share());
 
-  poolsV2Updates$.forEach((pool) => pools.update(pool))
-  return poolsV2Updates$
+  poolsV2Updates$.forEach((pool) => pools.update(pool));
+  return poolsV2Updates$;
 }
 
 import { Logger, ILogObj } from "tslog";
@@ -126,23 +131,32 @@ async function main(): Promise<void> {
 
       // Try loading initial pool reserves using query of type v1. If the updates are empty,
       // try using the v2 query types.
-      const useV1Subscription = await loadInitReservesV1(graphqlClient).then((initPools) => {
-        pools.updateBatch(initPools)
-        return initPools.length > 0
-      })
+      const useV1Subscription = await loadInitReservesV1(graphqlClient).then(
+        (initPools) => {
+          pools.updateBatch(initPools);
+          return initPools.length > 0;
+        },
+      );
 
       if (useV1Subscription) {
-        log.info("Proceeding with v1 subscription query on pool updates")
-        let poolsV2Updates$ = updatePools(graphqlClient, pools, v1PoolSubscriptionQuery)
+        log.info("Proceeding with v1 subscription query on pool updates");
+        let poolsV2Updates$ = updatePools(
+          graphqlClient,
+          pools,
+          v1PoolSubscriptionQuery,
+        );
         setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
-      }
-      else {
+      } else {
         await loadInitReservesV2(graphqlClient).then((initPools) => {
-          pools.updateBatch(initPools)
-        })
+          pools.updateBatch(initPools);
+        });
 
-        log.info("Proceeding with v2 subscription query on pool updates")
-        let poolsV2Updates$ = updatePools(graphqlClient, pools, v2PoolSubscriptionQuery)
+        log.info("Proceeding with v2 subscription query on pool updates");
+        let poolsV2Updates$ = updatePools(
+          graphqlClient,
+          pools,
+          v2PoolSubscriptionQuery,
+        );
         setupPoolsV2OverWs(wsServer, poolsV2Updates$, pools);
       }
 
