@@ -34,7 +34,7 @@ export class Pools {
   update(newPool: PoolV2) {
     // TODO remove this hack when there are no longer 2 versions of subscription query
     newPool = fixBrokenPoolV2(newPool)
-    
+
     let pool = this.pools.get(newPool.id)
     if (pool === undefined) {
       this.pools.set(newPool.id, newPool)
@@ -123,7 +123,7 @@ function fixBrokenPoolV2(pool: any): PoolV2 {
       token1: pool.token1,
       reserves0: pool.reserves0,
       reserves1: pool.reserves1,
-      lastUpdateTimestamp: pool['blockTimestamp'],
+      lastUpdateTimestamp: pool.blockTimestamp,
     }
   }
   return pool as PoolV2
