@@ -15,11 +15,15 @@ format: # Formats the code.
 
 .PHONY: local-up
 local-up: # Starts the app.
-	npm run start
+	@npm run start
 
 .PHONY: dev-up
 dev-up: # Starts the app using dev environment GraphQL db.
 	export NODE_APP_INSTANCE=dev && npm run start
+
+.PHONY: local-prod
+local-prod: # Starts the app using prod environment GraphQL db.
+	export NODE_APP_INSTANCE=prod && npm run start
 
 .PHONY: show-envs
 show-envs: # Shows the environment variables that are set.
