@@ -15,7 +15,7 @@ format: # Formats the code.
 
 .PHONY: local-up
 local-up: # Starts the app.
-	npm run start
+	@npm run start
 
 .PHONY: dev-up
 dev-up: # Starts the app using dev environment GraphQL db.
