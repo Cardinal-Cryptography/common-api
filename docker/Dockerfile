@@ -6,4 +6,4 @@ WORKDIR /common-api
 COPY . .
 RUN npm ci
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start", "--silent"]
