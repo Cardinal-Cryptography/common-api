@@ -6,11 +6,13 @@ import express from "express";
 
 import { Config } from "./config";
 import * as rest from "./servers/http";
+import { coingeckoTickers } from "./servers/http/coingecko";
 import { graphqlSubscribe$, RawElement } from "./grapqhl";
 import { poolsV2SubscriptionQuery as v2PoolSubscriptionQuery } from "./grapqhl/v2/queries";
 import { poolsV2SubscriptionQuery as v1PoolSubscriptionQuery } from "./grapqhl/v1/queries";
 import { setupPoolsV2OverWs } from "./servers/ws/amm";
 import { UsdPriceCache } from "./services/coingeckoPriceCache";
+import { CoingeckoIntegration } from "./services/coingeckoIntegration";
 import {
   loadInitReservesV1,
   loadInitReservesV2,
@@ -99,6 +101,12 @@ async function main(): Promise<void> {
     usdtUsdPriceCache,
     usdcUsdPriceCache,
   );
+
+  const conigeckoIntegration = new CoingeckoIntegration(
+    pools,
+    azeroUsdPriceCache,
+  );
+  coingeckoTickers(app, conigeckoIntegration);
 
   if (config.enableDemoMode || config.enableGraphql) {
     const wsServer = new WebSocketServer(config.ws, () => {
