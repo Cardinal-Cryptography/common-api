@@ -9,7 +9,6 @@ const addressRegex = /[\w\d]{48}/;
 export function healthcheckEnpoint(app: express.Express, config: Config) {
   app.get("/health", (_req, res) => {
     const status = {
-      priceCacheEnabled: config.enablePriceCache,
       demoModeEnabled: config.enableDemoMode,
       graphqlUpdatesEnabled: config.enableGraphql,
     };

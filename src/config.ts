@@ -1,7 +1,6 @@
 const config = require("config");
 
 export class Config {
-  enablePriceCache: boolean;
   enableDemoMode: boolean;
   enableGraphql: boolean;
   http: {
@@ -46,9 +45,6 @@ export class Config {
         ? config.priceCacheInvaliditySeconds
         : 3600);
 
-    this.enablePriceCache = process.env.COMMON_API_ENABLE_PRICE_CACHE
-      ? process.env.COMMON_API_ENABLE_PRICE_CACHE === "true"
-      : true;
     this.enableDemoMode = process.env.COMMON_API_ENABLE_DEMO_MODE
       ? process.env.COMMON_API_ENABLE_DEMO_MODE === "true"
       : false;
