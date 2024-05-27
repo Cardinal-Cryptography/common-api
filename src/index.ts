@@ -68,39 +68,36 @@ async function main(): Promise<void> {
   rest.poolsV2Endpoints(app, pools);
   rest.healthcheckEnpoint(app, config);
 
-  if (config.enablePriceCache) {
-    log.info("USD price cache enabled");
+  log.info("USD price cache enabled");
+  const azeroUsdPriceCache = new UsdPriceCache(
+    "aleph-zero",
+    config.priceCacheInvaliditySeconds,
+  );
+  const ethUsdPriceCache = new UsdPriceCache(
+    "ethereum",
+    config.priceCacheInvaliditySeconds,
+  );
+  const bitcoinUsdPriceCache = new UsdPriceCache(
+    "bitcoin",
+    config.priceCacheInvaliditySeconds,
+  );
+  const usdtUsdPriceCache = new UsdPriceCache(
+    "tether",
+    config.priceCacheInvaliditySeconds,
+  );
+  const usdcUsdPriceCache = new UsdPriceCache(
+    "usd-coin",
+    config.priceCacheInvaliditySeconds,
+  );
 
-    const azeroUsdPriceCache = new UsdPriceCache(
-      "aleph-zero",
-      config.priceCacheInvaliditySeconds,
-    );
-    const ethUsdPriceCache = new UsdPriceCache(
-      "ethereum",
-      config.priceCacheInvaliditySeconds,
-    );
-    const bitcoinUsdPriceCache = new UsdPriceCache(
-      "bitcoin",
-      config.priceCacheInvaliditySeconds,
-    );
-    const usdtUsdPriceCache = new UsdPriceCache(
-      "tether",
-      config.priceCacheInvaliditySeconds,
-    );
-    const usdcUsdPriceCache = new UsdPriceCache(
-      "usd-coin",
-      config.priceCacheInvaliditySeconds,
-    );
-
-    rest.usdPriceEndpoints(
-      app,
-      azeroUsdPriceCache,
-      ethUsdPriceCache,
-      bitcoinUsdPriceCache,
-      usdtUsdPriceCache,
-      usdcUsdPriceCache,
-    );
-  }
+  rest.usdPriceEndpoints(
+    app,
+    azeroUsdPriceCache,
+    ethUsdPriceCache,
+    bitcoinUsdPriceCache,
+    usdtUsdPriceCache,
+    usdcUsdPriceCache,
+  );
 
   if (config.enableDemoMode || config.enableGraphql) {
     const wsServer = new WebSocketServer(config.ws, () => {
