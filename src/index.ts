@@ -38,6 +38,7 @@ function updatePools(
 import { Logger, ILogObj } from "tslog";
 
 export const log: Logger<ILogObj> = new Logger({
+  stylePrettyLogs: false,
   prettyLogTemplate:
     "{{logLevelName}}\t{{yyyy}}.{{mm}}.{{dd}} {{hh}}:{{MM}}:{{ss}}:{{ms}}\t[{{filePathWithLine}}{{name}}]\t",
 });
