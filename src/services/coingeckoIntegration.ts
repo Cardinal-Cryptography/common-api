@@ -1,4 +1,4 @@
-import { Pools, PoolV2 } from "../models/pool";
+import { LowestHighestSwapPrice, Pools, PoolV2 } from "../models/pool";
 import { PairSwapVolume } from "../models/pool";
 import { UsdPriceCache } from "./coingeckoPriceCache";
 
@@ -19,6 +19,7 @@ export class CoingeckoIntegration {
       let poolId = pool.id;
       let poolVolume = await this.pairVolume(poolId);
       let ticker = this.poolToTicker(pool, poolVolume);
+      let lowestHighest = await this.pairLowestHighestSwapPrice(poolId);
       tickers.push(ticker);
     }
     return tickers;
@@ -43,16 +44,39 @@ export class CoingeckoIntegration {
     }
   }
 
+  private async pairLowestHighestSwapPrice(
+    poolId: string,
+  ): Promise<LowestHighestSwapPrice> {
+    let now_millis = new Date().getTime();
+    let yesterday_millis = now_millis - DAY_IN_MILLIS;
+    const price = await this.pools.poolLowestHighestSwapPrice(
+      poolId,
+      BigInt(yesterday_millis),
+      BigInt(now_millis),
+    );
+    if (!price) {
+      return {
+        pool: poolId,
+        min_price_0in: null,
+        max_price_0in: null,
+        min_price_1in: null,
+        max_price_1in: null,
+      };
+    } else {
+      return price;
+    }
+  }
+
   private poolToTicker(pool: PoolV2, poolVolume: PairSwapVolume): Ticker {
     return {
-      tickerId: `${pool.token0}_${pool.token1}`,
-      baseCurrency: pool.token0,
-      targetCurrency: pool.token1,
-      poolId: pool.id,
-      lastPrice: "0",
-      baseVolume: poolVolume.amount0_in.toString(),
-      targetVolume: poolVolume.amount1_in.toString(),
-      liquidityInUsd: "0",
+      ticker_id: pool.id,
+      base_currency: pool.token0,
+      target_currency: pool.token1,
+      pool_id: pool.id,
+      last_price: "0",
+      base_volume: poolVolume.amount0_in.toString(),
+      target_volume: poolVolume.amount1_in.toString(),
+      liquidity_in_usd: "0",
       high: "0",
       low: "0",
     };
@@ -60,14 +84,24 @@ export class CoingeckoIntegration {
 }
 
 export interface Ticker {
-  tickerId: string;
-  baseCurrency: string;
-  targetCurrency: string;
-  poolId: string;
-  lastPrice: string;
-  baseVolume: string;
-  targetVolume: string;
-  liquidityInUsd: string;
+  // Pool contract address for DEX
+  ticker_id: string;
+  // Contract Address of a the base cryptoasset
+  base_currency: string;
+  // Contract Address of a the target cryptoasset
+  target_currency: string;
+  // pool/pair address or unique ID
+  pool_id: string;
+  // Last transacted price of base currency based on given target currency (unit in base or target)
+  last_price: string;
+  // 24 hour trading volume for the pair (unit in base)
+  base_volume: string;
+  // 24 hour trading volume for the pair (unit in target)
+  target_volume: string;
+  // Pool liquidity in USD
+  liquidity_in_usd: string;
+  // Rolling 24-hours highest transaction price
   high: string;
+  // Rolling 24-hours lowest transaction price
   low: string;
 }

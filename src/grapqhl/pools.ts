@@ -79,6 +79,22 @@ export async function pairSwapVolume(
   return volume;
 }
 
+function lowestHighestSwapsPriceQuery(
+  poolId: string,
+  fromMillis: bigint,
+  toMillis: bigint,
+): string {
+  return `
+  query {
+    pairLowestHighestSwapPrice(fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
+      pool
+      min_price_0in
+      max_price_0in
+      min_price_1in
+      max_price_1in
+    }`;
+}
+
 function pairSwapVolumesQuery(fromMillis: bigint, toMillis: bigint): string {
   return `
   query {

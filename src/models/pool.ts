@@ -17,6 +17,14 @@ export interface PairSwapVolume {
   amount1_in: bigint;
 }
 
+export interface LowestHighestSwapPrice {
+  pool: string;
+  min_price_0in: bigint | null;
+  max_price_0in: bigint | null;
+  min_price_1in: bigint | null;
+  max_price_1in: bigint | null;
+}
+
 export class Pools {
   pools: Map<string, PoolV2>;
   graphqlClient: Client | undefined;
@@ -51,6 +59,26 @@ export class Pools {
 
   async setGraphqlClient(client: Client) {
     this.graphqlClient = client;
+  }
+
+  async poolLowestHighestSwapPrice(
+    poolId: string,
+    fromMillis: bigint,
+    toMillis: bigint,
+  ): Promise<LowestHighestSwapPrice | null> {
+    if (!this.graphqlClient) {
+      return null;
+    }
+    // We want to query the volumes for the nearest minut.
+    // This way we can leverage GraphQL caching functionality.
+    const fromNearestMinute = (fromMillis / 60000n) * 60000n;
+    const toNearestMinute = (toMillis / 60000n) * 60000n;
+    return pairLowestHighestSwapPrice(
+      this.graphqlClient,
+      poolId,
+      fromNearestMinute,
+      toNearestMinute,
+    );
   }
 
   async poolSwapVolume(
