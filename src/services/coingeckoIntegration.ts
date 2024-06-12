@@ -18,8 +18,8 @@ export class CoingeckoIntegration {
     for (let pool of this.pools.pools.values()) {
       let poolId = pool.id;
       let poolVolume = await this.pairVolume(poolId);
-      let ticker = this.poolToTicker(pool, poolVolume);
       let lowestHighest = await this.pairLowestHighestSwapPrice(poolId);
+      let ticker = this.poolToTicker(pool, poolVolume, lowestHighest);
       tickers.push(ticker);
     }
     return tickers;
@@ -59,15 +59,13 @@ export class CoingeckoIntegration {
         pool: poolId,
         min_price_0in: null,
         max_price_0in: null,
-        min_price_1in: null,
-        max_price_1in: null,
       };
     } else {
       return price;
     }
   }
 
-  private poolToTicker(pool: PoolV2, poolVolume: PairSwapVolume): Ticker {
+  private poolToTicker(pool: PoolV2, poolVolume: PairSwapVolume, lowestHighest: LowestHighestSwapPrice): Ticker {
     return {
       ticker_id: pool.id,
       base_currency: pool.token0,
@@ -77,8 +75,8 @@ export class CoingeckoIntegration {
       base_volume: poolVolume.amount0_in.toString(),
       target_volume: poolVolume.amount1_in.toString(),
       liquidity_in_usd: "0",
-      high: "0",
-      low: "0",
+      high: (lowestHighest.max_price_0in ?? 0.0).toString(),
+      low: (lowestHighest.min_price_0in ?? 0.0).toString(),
     };
   }
 }

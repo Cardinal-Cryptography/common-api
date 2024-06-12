@@ -19,10 +19,8 @@ export interface PairSwapVolume {
 
 export interface LowestHighestSwapPrice {
   pool: string;
-  min_price_0in: bigint | null;
-  max_price_0in: bigint | null;
-  min_price_1in: bigint | null;
-  max_price_1in: bigint | null;
+  min_price_0in: number | null;
+  max_price_0in: number | null;
 }
 
 export class Pools {

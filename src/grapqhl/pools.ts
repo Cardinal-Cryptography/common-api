@@ -32,8 +32,6 @@ export async function pairLowestHighestSwapPrice(
     pool: poolId,
     min_price_0in: null,
     max_price_0in: null,
-    min_price_1in: null,
-    max_price_1in: null,
   };
   const query = client.iterate({
     query: lowestHighestSwapsPriceQuery(poolId, fromMillis, toMillis),
@@ -42,11 +40,12 @@ export async function pairLowestHighestSwapPrice(
     const next = await query.next();
     const result = next.value;
     if (result.data) {
-      const swapPrices = result.data.pairLowestHighestSwapPrice as LowestHighestSwapPrice[];
-      if (swapPrices.length > 1) {
-        console.error(`Expected 1 swap price, got ${swapPrices.length}`);
+      const swapPrices = result.data.lowestHighestSwapPrice as LowestHighestSwapPrice[];
+
+      if (swapPrices.length > 2 || swapPrices.length == 0) {
+        console.error(`Expected 1 or 2 swap prices, got ${swapPrices.length}`);
       }
-      if (swapPrices.length == 1) {
+      else {
         swapPrice = swapPrices[0];
       }
     }
@@ -122,13 +121,13 @@ function lowestHighestSwapsPriceQuery(
 ): string {
   return `
   query {
-    pairLowestHighestSwapPrice(fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
+    lowestHighestSwapPrice(poolId: "${poolId}", fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
       pool
       min_price_0in
       max_price_0in
-      min_price_1in
-      max_price_1in
-    }`;
+    }
+  }
+`;
 }
 
 function pairSwapVolumesQuery(fromMillis: bigint, toMillis: bigint): string {
