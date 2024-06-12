@@ -1,6 +1,6 @@
 import { Client } from "graphql-ws";
 import { TokenId } from "../shared";
-import { pairSwapVolume, pairsSwapVolumes } from "../grapqhl/pools";
+import { pairLowestHighestSwapPrice, pairSwapVolume, pairsSwapVolumes } from "../grapqhl/pools";
 
 export interface PoolV2 {
   id: string;

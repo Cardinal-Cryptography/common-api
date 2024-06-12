@@ -1,6 +1,6 @@
 import { Client } from "graphql-ws";
 import { RawElement, readWholeConnection } from ".";
-import { PairSwapVolume, PoolV2 } from "../models/pool";
+import { LowestHighestSwapPrice, PairSwapVolume, PoolV2 } from "../models/pool";
 import { Observable, mergeMap } from "rxjs";
 import { poolsV2ConnectionsQuery as poolReservesV2 } from "./v2/queries";
 import { poolsV2ConnectionsQuery as poolReservesV1 } from "./v1/queries";
@@ -19,6 +19,42 @@ export function loadInitReservesV1(client: Client): Promise<PoolV2[]> {
 
 export function loadInitReservesV2(client: Client): Promise<PoolV2[]> {
   return readWholeConnection<PoolV2>(client, poolReservesV2);
+}
+
+/// Query pair lowest-highest swap price for a specific pool from the GraphQL server.
+export async function pairLowestHighestSwapPrice(
+  client: Client,
+  poolId: string,
+  fromMillis: bigint,
+  toMillis: bigint,
+): Promise<LowestHighestSwapPrice> {
+  let swapPrice: LowestHighestSwapPrice = {
+    pool: poolId,
+    min_price_0in: null,
+    max_price_0in: null,
+    min_price_1in: null,
+    max_price_1in: null,
+  };
+  const query = client.iterate({
+    query: lowestHighestSwapsPriceQuery(poolId, fromMillis, toMillis),
+  });
+  try {
+    const next = await query.next();
+    const result = next.value;
+    if (result.data) {
+      const swapPrices = result.data.pairLowestHighestSwapPrice as LowestHighestSwapPrice[];
+      if (swapPrices.length > 1) {
+        console.error(`Expected 1 swap price, got ${swapPrices.length}`);
+      }
+      if (swapPrices.length == 1) {
+        swapPrice = swapPrices[0];
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  return swapPrice;
 }
 
 /// Query all pair swap volumes from the GraphQL server.
