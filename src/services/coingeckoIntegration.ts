@@ -1,25 +1,39 @@
+import axios from "axios";
 import { LowestHighestSwapPrice, Pools, PoolV2 } from "../models/pool";
 import { PairSwapVolume } from "../models/pool";
-import { UsdPriceCache } from "./coingeckoPriceCache";
+import { UsdPriceCache, NamedUsdPriceCaches } from "./coingeckoPriceCache";
+import {log} from "../index"
+import { NamedTokens } from "../config";
+import { TokenId } from "../shared";
+import { TokenInfoById } from "../models/tokens";
 
 const DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+const NATIVE_UNITS_IN_ONE = 1_000_000_000_000n; // TODO, consider passing in a better way than constants
+const SPOT_TRADE_AMOUNT = 1_000_000n; // TODO consider varying spot trade amount based on the token's decimals
 
 export class CoingeckoIntegration {
   pools: Pools;
-  alephUsdPriceCache: UsdPriceCache;
+  nativeUsdPriceCache: UsdPriceCache;
+  tokenInfo: TokenInfoById;
 
-  constructor(pools: Pools, alephUsdPriceCache: UsdPriceCache) {
-    this.pools = pools;
-    this.alephUsdPriceCache = alephUsdPriceCache;
+  constructor(pools: Pools, alephUsdPriceCache: UsdPriceCache, tokenInfo: TokenInfoById) {
+    this.pools = pools
+    this.nativeUsdPriceCache = alephUsdPriceCache
+    this.tokenInfo = tokenInfo
   }
 
   async getTickers(): Promise<Ticker[]> {
     let tickers: Ticker[] = [];
     for (let pool of this.pools.pools.values()) {
-      let poolId = pool.id;
-      let poolVolume = await this.pairVolume(poolId);
-      let lowestHighest = await this.pairLowestHighestSwapPrice(poolId);
-      let ticker = this.poolToTicker(pool, poolVolume, lowestHighest);
+      const poolId = pool.id;
+      const liquidityInUsd = await this.liquidityInUsd(pool);
+      if (!liquidityInUsd) {
+        // no ticker for a pair for which liquidity in usd is not supported
+        continue
+      }
+      const poolVolume = await this.pairVolume(poolId);
+      const lowestHighest = await this.pairLowestHighestSwapPrice(poolId);
+      const ticker = this.poolToTicker(pool, poolVolume, liquidityInUsd, lowestHighest);
       tickers.push(ticker);
     }
     return tickers;
@@ -65,7 +79,7 @@ export class CoingeckoIntegration {
     }
   }
 
-  private poolToTicker(pool: PoolV2, poolVolume: PairSwapVolume, lowestHighest: LowestHighestSwapPrice): Ticker {
+  private poolToTicker(pool: PoolV2, poolVolume: PairSwapVolume, liquidityInUsd: number, lowestHighest: LowestHighestSwapPrice): Ticker {
     return {
       ticker_id: pool.id,
       base_currency: pool.token0,
@@ -74,10 +88,23 @@ export class CoingeckoIntegration {
       last_price: "0",
       base_volume: poolVolume.amount0_in.toString(),
       target_volume: poolVolume.amount1_in.toString(),
-      liquidity_in_usd: "0",
+      liquidity_in_usd: liquidityInUsd.toString(),
       high: (lowestHighest.max_price_0in ?? 0.0).toString(),
       low: (lowestHighest.min_price_0in ?? 0.0).toString(),
     };
+  }
+
+  // use only for tokens present in this.tokenUsdPrices
+  private async liquidityInUsd(pool: PoolV2): Promise<number | undefined> {
+    let price0 = await this.tokenInfo.getUsdPrice(pool.token0)
+    let price1 = await this.tokenInfo.getUsdPrice(pool.token1)
+    let decimals0 = this.tokenInfo.getDecimals(pool.token0)
+    let decimals1 = this.tokenInfo.getDecimals(pool.token1)
+    if (price0 && price1 && decimals0 && decimals1) {
+      let liq0 = price0 * Number(BigInt(pool.reserves0)) / (10 ** decimals0)
+      let liq1 = price1 * Number(BigInt(pool.reserves1)) / (10 ** decimals1)
+      return liq0 + liq1
+    }
   }
 }
 

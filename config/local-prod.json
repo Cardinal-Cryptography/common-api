@@ -1,0 +1,37 @@
+{
+  "priceCacheInvaliditySeconds": 3600,
+  "http": {
+    "port": 3001
+  },
+  "ws": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "graphql": {
+    "proto": "wss",
+    "host": "indexer.azero.dev",
+    "port": 443
+  },
+  "tokens": {
+    "azero": {
+      "id": "5CtuFVgEUz13SFPVY6s2cZrnLDEkxQXc19aXrNARwEBeCXgg",
+      "decimals": 12
+    },
+    "weth": { 
+      "id": "5EoFQd36196Duo6fPTz2MWHXRzwTJcyETHyCyaB3rb61Xo2u",
+      "decimals": 18
+    },
+    "wbtc": { 
+      "id": "5EEtCdKLyyhQnNQWWWPM1fMDx1WdVuiaoR9cA6CWttgyxtuJ",
+      "decimals": 8
+    },
+    "usdt": { 
+      "id": "5Et3dDcXUiThrBCot7g65k3oDSicGy4qC82cq9f911izKNtE",
+      "decimals": 6
+    },
+    "usdc": { 
+      "id": "5FYFojNCJVFR2bBNKfAePZCa72ZcVX5yeTv8K9bzeUo8D83Z",
+      "decimals": 6
+    }
+  }
+}

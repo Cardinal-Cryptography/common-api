@@ -38,6 +38,7 @@ function updatePools(
 }
 
 import { Logger, ILogObj } from "tslog";
+import { TokenInfoById } from "./models/tokens";
 
 export const log: Logger<ILogObj> = new Logger({
   stylePrettyLogs: false,
@@ -102,9 +103,18 @@ async function main(): Promise<void> {
     usdcUsdPriceCache,
   );
 
+  const tokens = new TokenInfoById(config.tokens, {
+    azero: azeroUsdPriceCache,
+    weth: ethUsdPriceCache,
+    wbtc: bitcoinUsdPriceCache,
+    usdt: usdtUsdPriceCache,
+    usdc: usdcUsdPriceCache,
+  })
+
   const conigeckoIntegration = new CoingeckoIntegration(
     pools,
     azeroUsdPriceCache,
+    tokens,
   );
   coingeckoTickers(app, conigeckoIntegration);
 
