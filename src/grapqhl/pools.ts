@@ -117,7 +117,7 @@ export async function pairSwapVolume(
 
 // Price of the target currency in the base currency (i.e. amount1_out / amount0_in or amount1_in / amount0_out)
 // in the most recent transaction
-export async function lastPairSwapPrice(client: Client, pool: PoolV2, tokens: TokenInfoById): Promise<number | undefined> {
+export async function lastPairSwapPrice(client: Client, pool: PoolV2, tokenInfo: TokenInfoById): Promise<number | undefined> {
   const query = client.iterate({
     query: lastPairSwapQuery(pool.id),
   });
@@ -135,8 +135,8 @@ export async function lastPairSwapPrice(client: Client, pool: PoolV2, tokens: To
         const amount0_out = Number(swapAmounts[0].amount0Out);
         const amount1_in = Number(swapAmounts[0].amount1In);
         const amount1_out = Number(swapAmounts[0].amount1Out);
-        const decimals0 = tokens.getDecimals(pool.token0);
-        const decimals1 = tokens.getDecimals(pool.token1);
+        const decimals0 = tokenInfo.getDecimals(pool.token0);
+        const decimals1 = tokenInfo.getDecimals(pool.token1);
         if (decimals0 && decimals1) {
           return amount0_in == 0 ? 
             (amount1_in * (10 ** decimals0)) / (amount0_out * (10 ** decimals1)) :

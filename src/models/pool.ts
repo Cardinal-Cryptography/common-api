@@ -125,11 +125,11 @@ export class Pools {
     );
   }
 
-  async lastPoolSwapPrice(pool: PoolV2, tokens: TokenInfoById): Promise<number | undefined> {
+  async lastPoolSwapPrice(pool: PoolV2, tokenInfo: TokenInfoById): Promise<number | undefined> {
     if (!this.graphqlClient) {
       return 0
     }
-    return lastPairSwapPrice(this.graphqlClient, pool, tokens)
+    return lastPairSwapPrice(this.graphqlClient, pool, tokenInfo)
   }
 
   public toString(): string {

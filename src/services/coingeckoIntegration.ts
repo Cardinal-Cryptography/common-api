@@ -19,21 +19,27 @@ export class CoingeckoIntegration {
   async getTickers(): Promise<Ticker[]> {
     let tickers: Ticker[] = [];
     for (let pool of this.pools.pools.values()) {
-      const poolId = pool.id;
-      const liquidityInUsd = await this.liquidityInUsd(pool);
+      const name0 = this.tokenInfo.getName(pool.token0)
+      const name1 = this.tokenInfo.getName(pool.token1)
+      
+      // no ticker for a pair which can't infer name, liquidity in USD, or last price
+      if (!name0 || !name1) {
+        continue
+      }
+      const liquidityInUsd = await this.liquidityInUsd(pool)
       if (!liquidityInUsd) {
-        // no ticker for a pair for which liquidity in usd is not supported
         continue
       }
-      const last_price = await this.pools.lastPoolSwapPrice(pool, this.tokenInfo);
+      const last_price = await this.pools.lastPoolSwapPrice(pool, this.tokenInfo)
       if (!last_price) {
-        // no ticker for a pair for which last price couldn't be feched
         continue
       }
-      const poolVolume = await this.pairVolume(poolId);
-      const lowestHighest = await this.pairLowestHighestSwapPrice(poolId);
-      const ticker = this.poolToTicker(pool, poolVolume, last_price, liquidityInUsd, lowestHighest);
-      tickers.push(ticker);
+
+      const tickerName = `${name0}_${name1}`
+      const poolVolume = await this.pairVolume(pool.id)
+      const lowestHighest = await this.pairLowestHighestSwapPrice(pool.id)
+      const ticker = this.poolToTicker(pool, tickerName, poolVolume, last_price, liquidityInUsd, lowestHighest)
+      tickers.push(ticker)
     }
     return tickers;
   }
@@ -80,13 +86,14 @@ export class CoingeckoIntegration {
 
   private poolToTicker(
     pool: PoolV2,
+    tickerName: string,
     poolVolume: PairSwapVolume,
     last_price: number,
     liquidityInUsd: number,
     lowestHighest: LowestHighestSwapPrice
   ): Ticker {
     return {
-      ticker_id: pool.id,
+      ticker_id: tickerName,
       base_currency: pool.token0,
       target_currency: pool.token1,
       pool_id: pool.id,
