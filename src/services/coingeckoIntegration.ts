@@ -19,13 +19,7 @@ export class CoingeckoIntegration {
   async getTickers(): Promise<Ticker[]> {
     let tickers: Ticker[] = [];
     for (let pool of this.pools.pools.values()) {
-      const name0 = this.tokenInfo.getName(pool.token0)
-      const name1 = this.tokenInfo.getName(pool.token1)
-      
-      // no ticker for a pair which can't infer name, liquidity in USD, or last price
-      if (!name0 || !name1) {
-        continue
-      }
+      // no ticker for a pair which can't infer liquidity in USD, or last price
       const liquidityInUsd = await this.liquidityInUsd(pool)
       if (!liquidityInUsd) {
         continue
@@ -35,10 +29,9 @@ export class CoingeckoIntegration {
         continue
       }
 
-      const tickerName = `${name0}_${name1}`
       const poolVolume = await this.pairVolume(pool.id)
       const lowestHighest = await this.pairLowestHighestSwapPrice(pool.id)
-      const ticker = this.poolToTicker(pool, tickerName, poolVolume, last_price, liquidityInUsd, lowestHighest)
+      const ticker = this.poolToTicker(pool, poolVolume, last_price, liquidityInUsd, lowestHighest)
       tickers.push(ticker)
     }
     return tickers;
@@ -86,14 +79,13 @@ export class CoingeckoIntegration {
 
   private poolToTicker(
     pool: PoolV2,
-    tickerName: string,
     poolVolume: PairSwapVolume,
     last_price: number,
     liquidityInUsd: number,
     lowestHighest: LowestHighestSwapPrice
   ): Ticker {
     return {
-      ticker_id: tickerName,
+      ticker_id: `${pool.token0}_${pool.token1}`,
       base_currency: pool.token0,
       target_currency: pool.token1,
       pool_id: pool.id,
