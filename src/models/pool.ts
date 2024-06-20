@@ -1,6 +1,7 @@
 import { Client } from "graphql-ws";
 import { TokenId } from "../shared";
-import { pairLowestHighestSwapPrice, pairSwapVolume, pairsSwapVolumes } from "../grapqhl/pools";
+import { lastPairSwapPrice, pairLowestHighestSwapPrice, pairSwapVolume, pairsSwapVolumes } from "../grapqhl/pools";
+import { TokenInfoById } from "./tokens";
 
 export interface PoolV2 {
   id: string;
@@ -21,6 +22,13 @@ export interface LowestHighestSwapPrice {
   pool: string;
   min_price_0in: number | null;
   max_price_0in: number | null;
+}
+
+export interface SwapAmounts {
+  amount0In: string;
+  amount0Out: string;
+  amount1In: string;
+  amount1Out: string;
 }
 
 export class Pools {
@@ -115,6 +123,13 @@ export class Pools {
       fromNearestMinute,
       toNearestMinute,
     );
+  }
+
+  async lastPoolSwapPrice(pool: PoolV2, tokens: TokenInfoById): Promise<number | undefined> {
+    if (!this.graphqlClient) {
+      return 0
+    }
+    return lastPairSwapPrice(this.graphqlClient, pool, tokens)
   }
 
   public toString(): string {

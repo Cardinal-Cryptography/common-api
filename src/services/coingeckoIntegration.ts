@@ -1,15 +1,9 @@
-import axios from "axios";
 import { LowestHighestSwapPrice, Pools, PoolV2 } from "../models/pool";
 import { PairSwapVolume } from "../models/pool";
 import { UsdPriceCache, NamedUsdPriceCaches } from "./coingeckoPriceCache";
-import {log} from "../index"
-import { NamedTokens } from "../config";
-import { TokenId } from "../shared";
 import { TokenInfoById } from "../models/tokens";
 
 const DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
-const NATIVE_UNITS_IN_ONE = 1_000_000_000_000n; // TODO, consider passing in a better way than constants
-const SPOT_TRADE_AMOUNT = 1_000_000n; // TODO consider varying spot trade amount based on the token's decimals
 
 export class CoingeckoIntegration {
   pools: Pools;
@@ -31,9 +25,14 @@ export class CoingeckoIntegration {
         // no ticker for a pair for which liquidity in usd is not supported
         continue
       }
+      const last_price = await this.pools.lastPoolSwapPrice(pool, this.tokenInfo);
+      if (!last_price) {
+        // no ticker for a pair for which last price couldn't be feched
+        continue
+      }
       const poolVolume = await this.pairVolume(poolId);
       const lowestHighest = await this.pairLowestHighestSwapPrice(poolId);
-      const ticker = this.poolToTicker(pool, poolVolume, liquidityInUsd, lowestHighest);
+      const ticker = this.poolToTicker(pool, poolVolume, last_price, liquidityInUsd, lowestHighest);
       tickers.push(ticker);
     }
     return tickers;
@@ -79,13 +78,19 @@ export class CoingeckoIntegration {
     }
   }
 
-  private poolToTicker(pool: PoolV2, poolVolume: PairSwapVolume, liquidityInUsd: number, lowestHighest: LowestHighestSwapPrice): Ticker {
+  private poolToTicker(
+    pool: PoolV2,
+    poolVolume: PairSwapVolume,
+    last_price: number,
+    liquidityInUsd: number,
+    lowestHighest: LowestHighestSwapPrice
+  ): Ticker {
     return {
       ticker_id: pool.id,
       base_currency: pool.token0,
       target_currency: pool.token1,
       pool_id: pool.id,
-      last_price: "0",
+      last_price: last_price.toString(),
       base_volume: poolVolume.amount0_in.toString(),
       target_volume: poolVolume.amount1_in.toString(),
       liquidity_in_usd: liquidityInUsd.toString(),
