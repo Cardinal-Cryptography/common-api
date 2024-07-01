@@ -1,8 +1,8 @@
 const config = require("config");
 
 export interface TokenInfo {
-  id: string,
-  decimals: number,
+  id: string;
+  decimals: number;
 }
 
 export interface NamedTokens {
@@ -52,17 +52,27 @@ export class Config {
     const graphql_port =
       process.env.COMMON_API_GRAPHQL_PORT ||
       (config.has("graphql.port") ? config.graphql.port : 4351);
-    
+
     const azero =
-      (config.has("tokens.azero.id") && config.has("tokens.azero.decimals") ? config.tokens.azero : null);
+      config.has("tokens.azero.id") && config.has("tokens.azero.decimals")
+        ? config.tokens.azero
+        : null;
     const weth =
-      (config.has("tokens.weth.id") && config.has("tokens.weth.decimals") ? config.tokens.weth : null);
+      config.has("tokens.weth.id") && config.has("tokens.weth.decimals")
+        ? config.tokens.weth
+        : null;
     const wbtc =
-      (config.has("tokens.wbtc.id") && config.has("tokens.wbtc.decimals") ? config.tokens.wbtc : null);
+      config.has("tokens.wbtc.id") && config.has("tokens.wbtc.decimals")
+        ? config.tokens.wbtc
+        : null;
     const usdt =
-      (config.has("tokens.usdt.id") && config.has("tokens.usdt.decimals") ? config.tokens.usdt : null);
+      config.has("tokens.usdt.id") && config.has("tokens.usdt.decimals")
+        ? config.tokens.usdt
+        : null;
     const usdc =
-      (config.has("tokens.usdc.id") && config.has("tokens.usdc.decimals") ? config.tokens.usdc : null);
+      config.has("tokens.usdc.id") && config.has("tokens.usdc.decimals")
+        ? config.tokens.usdc
+        : null;
 
     const priceCacheInvaliditySeconds =
       process.env.COMMON_API_PRICE_CACHE_INVALIDITY_SECONDS ||

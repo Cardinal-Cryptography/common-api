@@ -1,6 +1,11 @@
 import { Client } from "graphql-ws";
 import { TokenId } from "../shared";
-import { lastPairSwapPrice, pairLowestHighestSwapPrice, pairSwapVolume, pairsSwapVolumes } from "../grapqhl/pools";
+import {
+  lastPairSwapPrice,
+  pairLowestHighestSwapPrice,
+  pairSwapVolume,
+  pairsSwapVolumes,
+} from "../grapqhl/pools";
 import { TokenInfoById } from "./tokens";
 
 export interface PoolV2 {
@@ -125,11 +130,14 @@ export class Pools {
     );
   }
 
-  async lastPoolSwapPrice(pool: PoolV2, tokens: TokenInfoById): Promise<number | null> {
+  async lastPoolSwapPrice(
+    pool: PoolV2,
+    tokens: TokenInfoById,
+  ): Promise<number | null> {
     if (!this.graphqlClient) {
-      return 0
+      return 0;
     }
-    return lastPairSwapPrice(this.graphqlClient, pool, tokens)
+    return lastPairSwapPrice(this.graphqlClient, pool, tokens);
   }
 
   public toString(): string {

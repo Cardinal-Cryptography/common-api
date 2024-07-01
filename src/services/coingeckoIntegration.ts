@@ -10,35 +10,51 @@ export class CoingeckoIntegration {
   nativeUsdPriceCache: UsdPriceCache;
   tokenInfo: TokenInfoById;
 
-  constructor(pools: Pools, alephUsdPriceCache: UsdPriceCache, tokenInfo: TokenInfoById) {
-    this.pools = pools
-    this.nativeUsdPriceCache = alephUsdPriceCache
-    this.tokenInfo = tokenInfo
+  constructor(
+    pools: Pools,
+    alephUsdPriceCache: UsdPriceCache,
+    tokenInfo: TokenInfoById,
+  ) {
+    this.pools = pools;
+    this.nativeUsdPriceCache = alephUsdPriceCache;
+    this.tokenInfo = tokenInfo;
   }
 
   async getTickers(): Promise<Ticker[]> {
     let tickers: Ticker[] = [];
 
-    const pools = []
-    const liquidities = []
+    const pools = [];
+    const liquidities = [];
 
     // collect liquidities sequentially so that coingecko doesn't think it's being spammed
     for (const pool of this.pools.pools.values()) {
-      const liquidity = await this.liquidityInUsd(pool)
+      const liquidity = await this.liquidityInUsd(pool);
       if (liquidity === null) {
-        continue
+        continue;
       }
-      pools.push(pool)
-      liquidities.push(liquidity)
+      pools.push(pool);
+      liquidities.push(liquidity);
     }
 
-    const lastPrices = await Promise.all(pools.map(pool => this.pools.lastPoolSwapPrice(pool, this.tokenInfo)))
-    const poolVolumes = await Promise.all(pools.map(pool => this.pairVolume(pool.id)))
-    const lowestHighest = await Promise.all(pools.map(pool => this.pairLowestHighestSwapPrice(pool.id)))
+    const lastPrices = await Promise.all(
+      pools.map((pool) => this.pools.lastPoolSwapPrice(pool, this.tokenInfo)),
+    );
+    const poolVolumes = await Promise.all(
+      pools.map((pool) => this.pairVolume(pool.id)),
+    );
+    const lowestHighest = await Promise.all(
+      pools.map((pool) => this.pairLowestHighestSwapPrice(pool.id)),
+    );
 
     for (let i = 0; i < pools.length; i++) {
-      const ticker = this.poolToTicker(pools[i], poolVolumes[i], lastPrices[i], liquidities[i], lowestHighest[i])
-      tickers.push(ticker)
+      const ticker = this.poolToTicker(
+        pools[i],
+        poolVolumes[i],
+        lastPrices[i],
+        liquidities[i],
+        lowestHighest[i],
+      );
+      tickers.push(ticker);
     }
     return tickers;
   }
@@ -88,7 +104,7 @@ export class CoingeckoIntegration {
     poolVolume: PairSwapVolume,
     lastPrice: number | null,
     liquidityInUsd: number,
-    lowestHighest: LowestHighestSwapPrice
+    lowestHighest: LowestHighestSwapPrice,
   ): Ticker {
     return {
       ticker_id: `${pool.token0}_${pool.token1}`,
@@ -99,23 +115,29 @@ export class CoingeckoIntegration {
       base_volume: poolVolume.amount0_in.toString(),
       target_volume: poolVolume.amount1_in.toString(),
       liquidity_in_usd: liquidityInUsd.toString(),
-      high: lowestHighest.max_price_0in !== null ? lowestHighest.max_price_0in.toString() : null,
-      low: lowestHighest.min_price_0in !== null ? lowestHighest.min_price_0in.toString() : null,
+      high:
+        lowestHighest.max_price_0in !== null
+          ? lowestHighest.max_price_0in.toString()
+          : null,
+      low:
+        lowestHighest.min_price_0in !== null
+          ? lowestHighest.min_price_0in.toString()
+          : null,
     };
   }
 
   // use only for tokens present in this.tokenUsdPrices
   private async liquidityInUsd(pool: PoolV2): Promise<number | null> {
-    let price0 = await this.tokenInfo.getUsdPrice(pool.token0)
-    let price1 = await this.tokenInfo.getUsdPrice(pool.token1)
-    let decimals0 = this.tokenInfo.getDecimals(pool.token0)
-    let decimals1 = this.tokenInfo.getDecimals(pool.token1)
+    let price0 = await this.tokenInfo.getUsdPrice(pool.token0);
+    let price1 = await this.tokenInfo.getUsdPrice(pool.token1);
+    let decimals0 = this.tokenInfo.getDecimals(pool.token0);
+    let decimals1 = this.tokenInfo.getDecimals(pool.token1);
     if (price0 && price1 && decimals0 && decimals1) {
-      let liq0 = price0 * Number(BigInt(pool.reserves0)) / (10 ** decimals0)
-      let liq1 = price1 * Number(BigInt(pool.reserves1)) / (10 ** decimals1)
-      return liq0 + liq1
+      let liq0 = (price0 * Number(BigInt(pool.reserves0))) / 10 ** decimals0;
+      let liq1 = (price1 * Number(BigInt(pool.reserves1))) / 10 ** decimals1;
+      return liq0 + liq1;
     }
-    return null
+    return null;
   }
 }
 

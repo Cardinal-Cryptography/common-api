@@ -109,7 +109,7 @@ async function main(): Promise<void> {
     wbtc: bitcoinUsdPriceCache,
     usdt: usdtUsdPriceCache,
     usdc: usdcUsdPriceCache,
-  })
+  });
 
   const conigeckoIntegration = new CoingeckoIntegration(
     pools,
