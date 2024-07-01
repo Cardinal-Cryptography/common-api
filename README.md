@@ -224,6 +224,7 @@ Example response:
 Returns basic information about the Common API configuration.
 
 Response format:
+
 ```json
 {
       priceCacheEnabled: <boolean>,

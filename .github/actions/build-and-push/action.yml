@@ -24,7 +24,7 @@ runs:
     - name: DOCKER | Login to Public Amazon ECR
       id: login-public-ecr
       uses: docker/login-action@v2
-      with: 
+      with:
         registry: public.ecr.aws
         username: ${{ inputs.aws_resources_ecr_access_key_id }}
         password: ${{ inputs.aws_resources_ecr_access_key }}

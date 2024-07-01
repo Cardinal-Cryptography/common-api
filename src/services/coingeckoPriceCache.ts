@@ -3,6 +3,14 @@ import axios from "axios";
 import { UsdTokenPrice } from "../models/usdTokenPrice";
 import { log } from "../index";
 
+export interface NamedUsdPriceCaches {
+  azero: UsdPriceCache;
+  weth: UsdPriceCache;
+  wbtc: UsdPriceCache;
+  usdt: UsdPriceCache;
+  usdc: UsdPriceCache;
+}
+
 export class UsdPriceCache {
   ticker: string;
   price: number;
