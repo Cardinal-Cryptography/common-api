@@ -117,7 +117,7 @@ export async function pairSwapVolume(
 
 // Price of the target currency in the base currency (i.e. amount1_out / amount0_in or amount1_in / amount0_out)
 // in the most recent transaction
-export async function lastPairSwapPrice(client: Client, pool: PoolV2, tokenInfo: TokenInfoById): Promise<number | undefined> {
+export async function lastPairSwapPrice(client: Client, pool: PoolV2, tokenInfo: TokenInfoById): Promise<number | null> {
   const query = client.iterate({
     query: lastPairSwapQuery(pool.id),
   });
@@ -147,6 +147,8 @@ export async function lastPairSwapPrice(client: Client, pool: PoolV2, tokenInfo:
   } catch (err) {
     console.error(err);
   }
+
+  return null
 }
 
 function lowestHighestSwapsPriceQuery(

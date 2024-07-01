@@ -18,20 +18,26 @@ export class CoingeckoIntegration {
 
   async getTickers(): Promise<Ticker[]> {
     let tickers: Ticker[] = [];
-    for (let pool of this.pools.pools.values()) {
-      // no ticker for a pair which can't infer liquidity in USD, or last price
-      const liquidityInUsd = await this.liquidityInUsd(pool)
-      if (!liquidityInUsd) {
-        continue
-      }
-      const last_price = await this.pools.lastPoolSwapPrice(pool, this.tokenInfo)
-      if (!last_price) {
-        continue
-      }
 
-      const poolVolume = await this.pairVolume(pool.id)
-      const lowestHighest = await this.pairLowestHighestSwapPrice(pool.id)
-      const ticker = this.poolToTicker(pool, poolVolume, last_price, liquidityInUsd, lowestHighest)
+    const pools = []
+    const liquidities = []
+
+    // collect liquidities sequentially so that coingecko doesn't think it's being spammed
+    for (const pool of this.pools.pools.values()) {
+      const liquidity = await this.liquidityInUsd(pool)
+      if (liquidity === null) {
+        continue
+      }
+      pools.push(pool)
+      liquidities.push(liquidity)
+    }
+
+    const lastPrices = await Promise.all(pools.map(pool => this.pools.lastPoolSwapPrice(pool, this.tokenInfo)))
+    const poolVolumes = await Promise.all(pools.map(pool => this.pairVolume(pool.id)))
+    const lowestHighest = await Promise.all(pools.map(pool => this.pairLowestHighestSwapPrice(pool.id)))
+
+    for (let i = 0; i < pools.length; i++) {
+      const ticker = this.poolToTicker(pools[i], poolVolumes[i], lastPrices[i], liquidities[i], lowestHighest[i])
       tickers.push(ticker)
     }
     return tickers;
@@ -80,7 +86,7 @@ export class CoingeckoIntegration {
   private poolToTicker(
     pool: PoolV2,
     poolVolume: PairSwapVolume,
-    last_price: number,
+    lastPrice: number | null,
     liquidityInUsd: number,
     lowestHighest: LowestHighestSwapPrice
   ): Ticker {
@@ -89,17 +95,17 @@ export class CoingeckoIntegration {
       base_currency: pool.token0,
       target_currency: pool.token1,
       pool_id: pool.id,
-      last_price: last_price.toString(),
+      last_price: lastPrice !== null ? lastPrice.toString() : null,
       base_volume: poolVolume.amount0_in.toString(),
       target_volume: poolVolume.amount1_in.toString(),
       liquidity_in_usd: liquidityInUsd.toString(),
-      high: (lowestHighest.max_price_0in ?? 0.0).toString(),
-      low: (lowestHighest.min_price_0in ?? 0.0).toString(),
+      high: lowestHighest.max_price_0in !== null ? lowestHighest.max_price_0in.toString() : null,
+      low: lowestHighest.min_price_0in !== null ? lowestHighest.min_price_0in.toString() : null,
     };
   }
 
   // use only for tokens present in this.tokenUsdPrices
-  private async liquidityInUsd(pool: PoolV2): Promise<number | undefined> {
+  private async liquidityInUsd(pool: PoolV2): Promise<number | null> {
     let price0 = await this.tokenInfo.getUsdPrice(pool.token0)
     let price1 = await this.tokenInfo.getUsdPrice(pool.token1)
     let decimals0 = this.tokenInfo.getDecimals(pool.token0)
@@ -109,6 +115,7 @@ export class CoingeckoIntegration {
       let liq1 = price1 * Number(BigInt(pool.reserves1)) / (10 ** decimals1)
       return liq0 + liq1
     }
+    return null
   }
 }
 
@@ -122,7 +129,7 @@ export interface Ticker {
   // pool/pair address or unique ID
   pool_id: string;
   // Last transacted price of base currency based on given target currency (unit in base or target)
-  last_price: string;
+  last_price: string | null;
   // 24 hour trading volume for the pair (unit in base)
   base_volume: string;
   // 24 hour trading volume for the pair (unit in target)
@@ -130,7 +137,7 @@ export interface Ticker {
   // Pool liquidity in USD
   liquidity_in_usd: string;
   // Rolling 24-hours highest transaction price
-  high: string;
+  high: string | null;
   // Rolling 24-hours lowest transaction price
-  low: string;
+  low: string | null;
 }
