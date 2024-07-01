@@ -91,14 +91,19 @@ export async function pairLowestHighestSwapPrice(
       if (swapPrices.length > 2 || swapPrices.length == 0) {
         console.error(`Expected 1 or 2 swap prices, got ${swapPrices.length}`);
       } else {
-        if (swapPrices[0].min_price_0in === null || swapPrices[0].max_price_0in === null) {
-          return swapPrice
+        if (
+          swapPrices[0].min_price_0in === null ||
+          swapPrices[0].max_price_0in === null
+        ) {
+          return swapPrice;
         }
         const decimals0 = tokenInfo.getDecimals(pool.token0);
         const decimals1 = tokenInfo.getDecimals(pool.token1);
         if (decimals0 && decimals1) {
-          const minPrice = swapPrices[0].min_price_0in * (10 ** (decimals0 - decimals1))
-          const maxPrice = swapPrices[0].max_price_0in * (10 ** (decimals0 - decimals1))
+          const minPrice =
+            swapPrices[0].min_price_0in * 10 ** (decimals0 - decimals1);
+          const maxPrice =
+            swapPrices[0].max_price_0in * 10 ** (decimals0 - decimals1);
           swapPrice = {
             pool: pool.id,
             min_price_0in: minPrice,

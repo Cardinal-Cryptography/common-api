@@ -43,7 +43,9 @@ export class CoingeckoIntegration {
       pools.map((pool) => this.pairVolume(pool.id)),
     );
     const lowestHighest = await Promise.all(
-      pools.map((pool) => this.pairLowestHighestSwapPrice(pool, this.tokenInfo)),
+      pools.map((pool) =>
+        this.pairLowestHighestSwapPrice(pool, this.tokenInfo),
+      ),
     );
 
     for (let i = 0; i < pools.length; i++) {
