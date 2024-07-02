@@ -43,7 +43,9 @@ export class CoingeckoIntegration {
       pools.map((pool) => this.pairVolume(pool.id)),
     );
     const lowestHighest = await Promise.all(
-      pools.map((pool) => this.pairLowestHighestSwapPrice(pool.id)),
+      pools.map((pool) =>
+        this.pairLowestHighestSwapPrice(pool, this.tokenInfo),
+      ),
     );
 
     for (let i = 0; i < pools.length; i++) {
@@ -79,18 +81,20 @@ export class CoingeckoIntegration {
   }
 
   private async pairLowestHighestSwapPrice(
-    poolId: string,
+    pool: PoolV2,
+    tokenInfo: TokenInfoById,
   ): Promise<LowestHighestSwapPrice> {
     let now_millis = new Date().getTime();
     let yesterday_millis = now_millis - DAY_IN_MILLIS;
     const price = await this.pools.poolLowestHighestSwapPrice(
-      poolId,
+      pool,
+      tokenInfo,
       BigInt(yesterday_millis),
       BigInt(now_millis),
     );
     if (!price) {
       return {
-        pool: poolId,
+        pool: pool.id,
         min_price_0in: null,
         max_price_0in: null,
       };

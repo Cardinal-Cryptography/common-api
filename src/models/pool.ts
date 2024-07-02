@@ -72,8 +72,19 @@ export class Pools {
     this.graphqlClient = client;
   }
 
+  async lastPoolSwapPrice(
+    pool: PoolV2,
+    tokenInfo: TokenInfoById,
+  ): Promise<number | null> {
+    if (!this.graphqlClient) {
+      return null;
+    }
+    return lastPairSwapPrice(this.graphqlClient, pool, tokenInfo);
+  }
+
   async poolLowestHighestSwapPrice(
-    poolId: string,
+    pool: PoolV2,
+    tokenInfo: TokenInfoById,
     fromMillis: bigint,
     toMillis: bigint,
   ): Promise<LowestHighestSwapPrice | null> {
@@ -86,7 +97,8 @@ export class Pools {
     const toNearestMinute = (toMillis / 60000n) * 60000n;
     return pairLowestHighestSwapPrice(
       this.graphqlClient,
-      poolId,
+      pool,
+      tokenInfo,
       fromNearestMinute,
       toNearestMinute,
     );
@@ -128,16 +140,6 @@ export class Pools {
       fromNearestMinute,
       toNearestMinute,
     );
-  }
-
-  async lastPoolSwapPrice(
-    pool: PoolV2,
-    tokens: TokenInfoById,
-  ): Promise<number | null> {
-    if (!this.graphqlClient) {
-      return 0;
-    }
-    return lastPairSwapPrice(this.graphqlClient, pool, tokens);
   }
 
   public toString(): string {
