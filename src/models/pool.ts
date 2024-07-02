@@ -77,7 +77,7 @@ export class Pools {
     tokenInfo: TokenInfoById,
   ): Promise<number | null> {
     if (!this.graphqlClient) {
-      return 0;
+      return null;
     }
     return lastPairSwapPrice(this.graphqlClient, pool, tokenInfo);
   }
