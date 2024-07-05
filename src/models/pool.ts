@@ -39,8 +39,8 @@ export interface LowestHighestSwapPrice {
 }
 
 export interface TotalLowestHighestSwapPrice {
-  lowestPrice: number | null,
-  highestPrice: number | null,
+  lowestPrice: number | null;
+  highestPrice: number | null;
 }
 
 export interface SwapAmounts {

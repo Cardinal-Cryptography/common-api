@@ -103,9 +103,17 @@ export async function pairLowestHighestSwapPrice(
         const decimals1 = tokenInfo.getDecimals(pool.token1);
         if (decimals0 && decimals1) {
           const minPrice =
-            Math.min(swapPrices[0].min_price_0in, swapPrices[1].min_price_0out) * 10 ** (decimals0 - decimals1);
+            Math.min(
+              swapPrices[0].min_price_0in,
+              swapPrices[1].min_price_0out,
+            ) *
+            10 ** (decimals0 - decimals1);
           const maxPrice =
-            Math.max(swapPrices[0].max_price_0in, swapPrices[1].max_price_0out) * 10 ** (decimals0 - decimals1);
+            Math.max(
+              swapPrices[0].max_price_0in,
+              swapPrices[1].max_price_0out,
+            ) *
+            10 ** (decimals0 - decimals1);
           swapPrice = {
             lowestPrice: minPrice,
             highestPrice: maxPrice,
