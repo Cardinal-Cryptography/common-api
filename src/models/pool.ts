@@ -33,7 +33,14 @@ export interface TotalPairSwapVolume {
 export interface LowestHighestSwapPrice {
   pool: string;
   min_price_0in: number | null;
+  min_price_0out: number | null;
   max_price_0in: number | null;
+  max_price_0out: number | null;
+}
+
+export interface TotalLowestHighestSwapPrice {
+  lowestPrice: number | null,
+  highestPrice: number | null,
 }
 
 export interface SwapAmounts {
@@ -94,7 +101,7 @@ export class Pools {
     tokenInfo: TokenInfoById,
     fromMillis: bigint,
     toMillis: bigint,
-  ): Promise<LowestHighestSwapPrice | null> {
+  ): Promise<TotalLowestHighestSwapPrice | null> {
     if (!this.graphqlClient) {
       return null;
     }

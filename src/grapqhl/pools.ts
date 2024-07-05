@@ -5,6 +5,7 @@ import {
   PairSwapVolume,
   PoolV2,
   SwapAmounts,
+  TotalLowestHighestSwapPrice,
 } from "../models/pool";
 import { Observable, mergeMap } from "rxjs";
 import { poolsV2ConnectionsQuery as poolReservesV2 } from "./v2/queries";
@@ -73,11 +74,10 @@ export async function pairLowestHighestSwapPrice(
   tokenInfo: TokenInfoById,
   fromMillis: bigint,
   toMillis: bigint,
-): Promise<LowestHighestSwapPrice> {
-  let swapPrice: LowestHighestSwapPrice = {
-    pool: pool.id,
-    min_price_0in: null,
-    max_price_0in: null,
+): Promise<TotalLowestHighestSwapPrice> {
+  let swapPrice: TotalLowestHighestSwapPrice = {
+    lowestPrice: null,
+    highestPrice: null,
   };
   const query = client.iterate({
     query: lowestHighestSwapsPriceQuery(pool.id, fromMillis, toMillis),
@@ -93,7 +93,9 @@ export async function pairLowestHighestSwapPrice(
       } else {
         if (
           swapPrices[0].min_price_0in === null ||
-          swapPrices[0].max_price_0in === null
+          swapPrices[0].max_price_0in === null ||
+          swapPrices[1].min_price_0out === null ||
+          swapPrices[1].max_price_0out === null
         ) {
           return swapPrice;
         }
@@ -101,13 +103,12 @@ export async function pairLowestHighestSwapPrice(
         const decimals1 = tokenInfo.getDecimals(pool.token1);
         if (decimals0 && decimals1) {
           const minPrice =
-            swapPrices[0].min_price_0in * 10 ** (decimals0 - decimals1);
+            Math.min(swapPrices[0].min_price_0in, swapPrices[1].min_price_0out) * 10 ** (decimals0 - decimals1);
           const maxPrice =
-            swapPrices[0].max_price_0in * 10 ** (decimals0 - decimals1);
+            Math.max(swapPrices[0].max_price_0in, swapPrices[1].max_price_0out) * 10 ** (decimals0 - decimals1);
           swapPrice = {
-            pool: pool.id,
-            min_price_0in: minPrice,
-            max_price_0in: maxPrice,
+            lowestPrice: minPrice,
+            highestPrice: maxPrice,
           };
         }
       }
@@ -202,7 +203,9 @@ function lowestHighestSwapsPriceQuery(
     lowestHighestSwapPrice(poolId: "${poolId}", fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
       pool
       min_price_0in
+      min_price_0out
       max_price_0in
+      max_price_0out
     }
   }
 `;
