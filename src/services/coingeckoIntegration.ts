@@ -1,4 +1,4 @@
-import { LowestHighestSwapPrice, Pools, PoolV2 } from "../models/pool";
+import { LowestHighestSwapPrice, Pools, PoolV2, TotalPairSwapVolume } from "../models/pool";
 import { PairSwapVolume } from "../models/pool";
 import { UsdPriceCache, NamedUsdPriceCaches } from "./coingeckoPriceCache";
 import { TokenInfoById } from "../models/tokens";
@@ -61,8 +61,11 @@ export class CoingeckoIntegration {
     return tickers;
   }
 
-  private async pairVolume(pool: PoolV2, tokenInfo: TokenInfoById): Promise<[number, number]> { // token0 volume, token1 volume
-    let volume: [number, number] = [0, 0]
+  private async pairVolume(pool: PoolV2, tokenInfo: TokenInfoById): Promise<TotalPairSwapVolume> { // token0 volume, token1 volume
+    let volume = {
+      token0Volume: 0,
+      token1Volume: 0,
+    }
     let now_millis = new Date().getTime();
     let yesterday_millis = now_millis - DAY_IN_MILLIS;
     const poolVolume = await this.pools.poolSwapVolume(
@@ -76,7 +79,10 @@ export class CoingeckoIntegration {
       if (decimals0 && decimals1) {
         const vol0 = Number(poolVolume.amount0_in + poolVolume.amount0_out) / (10 ** decimals0)
         const vol1 = Number(poolVolume.amount1_in + poolVolume.amount1_out) / (10 ** decimals1)
-        volume = [vol0, vol1]
+        volume = {
+          token0Volume: vol0,
+          token1Volume: vol1,
+        }
       }
     }
     return volume;
@@ -107,7 +113,7 @@ export class CoingeckoIntegration {
 
   private poolToTicker(
     pool: PoolV2,
-    poolVolume: [number, number],
+    poolVolume: TotalPairSwapVolume,
     lastPrice: number | null,
     liquidityInUsd: number,
     lowestHighest: LowestHighestSwapPrice,
@@ -118,8 +124,8 @@ export class CoingeckoIntegration {
       target_currency: pool.token1,
       pool_id: pool.id,
       last_price: lastPrice !== null ? lastPrice.toString() : null,
-      base_volume: poolVolume[0].toString(),
-      target_volume: poolVolume[1].toString(),
+      base_volume: poolVolume.token0Volume.toString(),
+      target_volume: poolVolume.token1Volume.toString(),
       liquidity_in_usd: liquidityInUsd.toString(),
       high:
         lowestHighest.max_price_0in !== null
