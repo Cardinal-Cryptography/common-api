@@ -26,8 +26,8 @@ export interface PairSwapVolume {
 }
 
 export interface TotalPairSwapVolume {
-  token0Volume: number,
-  token1Volume: number,
+  token0Volume: number;
+  token1Volume: number;
 }
 
 export interface LowestHighestSwapPrice {

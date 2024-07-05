@@ -1,4 +1,9 @@
-import { LowestHighestSwapPrice, Pools, PoolV2, TotalPairSwapVolume } from "../models/pool";
+import {
+  LowestHighestSwapPrice,
+  Pools,
+  PoolV2,
+  TotalPairSwapVolume,
+} from "../models/pool";
 import { PairSwapVolume } from "../models/pool";
 import { UsdPriceCache, NamedUsdPriceCaches } from "./coingeckoPriceCache";
 import { TokenInfoById } from "../models/tokens";
@@ -61,11 +66,15 @@ export class CoingeckoIntegration {
     return tickers;
   }
 
-  private async pairVolume(pool: PoolV2, tokenInfo: TokenInfoById): Promise<TotalPairSwapVolume> { // token0 volume, token1 volume
+  private async pairVolume(
+    pool: PoolV2,
+    tokenInfo: TokenInfoById,
+  ): Promise<TotalPairSwapVolume> {
+    // token0 volume, token1 volume
     let volume = {
       token0Volume: 0,
       token1Volume: 0,
-    }
+    };
     let now_millis = new Date().getTime();
     let yesterday_millis = now_millis - DAY_IN_MILLIS;
     const poolVolume = await this.pools.poolSwapVolume(
@@ -77,12 +86,16 @@ export class CoingeckoIntegration {
       let decimals0 = this.tokenInfo.getDecimals(pool.token0);
       let decimals1 = this.tokenInfo.getDecimals(pool.token1);
       if (decimals0 && decimals1) {
-        const vol0 = Number(poolVolume.amount0_in + poolVolume.amount0_out) / (10 ** decimals0)
-        const vol1 = Number(poolVolume.amount1_in + poolVolume.amount1_out) / (10 ** decimals1)
+        const vol0 =
+          Number(poolVolume.amount0_in + poolVolume.amount0_out) /
+          10 ** decimals0;
+        const vol1 =
+          Number(poolVolume.amount1_in + poolVolume.amount1_out) /
+          10 ** decimals1;
         volume = {
           token0Volume: vol0,
           token1Volume: vol1,
-        }
+        };
       }
     }
     return volume;
