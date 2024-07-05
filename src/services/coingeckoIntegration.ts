@@ -40,7 +40,7 @@ export class CoingeckoIntegration {
       pools.map((pool) => this.pools.lastPoolSwapPrice(pool, this.tokenInfo)),
     );
     const poolVolumes = await Promise.all(
-      pools.map((pool) => this.pairVolume(pool.id)),
+      pools.map((pool) => this.pairVolume(pool, this.tokenInfo)),
     );
     const lowestHighest = await Promise.all(
       pools.map((pool) =>
@@ -61,23 +61,25 @@ export class CoingeckoIntegration {
     return tickers;
   }
 
-  private async pairVolume(poolId: string): Promise<PairSwapVolume> {
+  private async pairVolume(pool: PoolV2, tokenInfo: TokenInfoById): Promise<[number, number]> { // token0 volume, token1 volume
+    let volume: [number, number] = [0, 0]
     let now_millis = new Date().getTime();
     let yesterday_millis = now_millis - DAY_IN_MILLIS;
-    const volume = await this.pools.poolSwapVolume(
-      poolId,
+    const poolVolume = await this.pools.poolSwapVolume(
+      pool.id,
       BigInt(yesterday_millis),
       BigInt(now_millis),
     );
-    if (!volume) {
-      return {
-        pool: poolId,
-        amount0_in: 0n,
-        amount1_in: 0n,
-      };
-    } else {
-      return volume;
+    if (poolVolume) {
+      let decimals0 = this.tokenInfo.getDecimals(pool.token0);
+      let decimals1 = this.tokenInfo.getDecimals(pool.token1);
+      if (decimals0 && decimals1) {
+        const vol0 = Number(poolVolume.amount0_in + poolVolume.amount0_out) / (10 ** decimals0)
+        const vol1 = Number(poolVolume.amount1_in + poolVolume.amount1_out) / (10 ** decimals1)
+        volume = [vol0, vol1]
+      }
     }
+    return volume;
   }
 
   private async pairLowestHighestSwapPrice(
@@ -105,7 +107,7 @@ export class CoingeckoIntegration {
 
   private poolToTicker(
     pool: PoolV2,
-    poolVolume: PairSwapVolume,
+    poolVolume: [number, number],
     lastPrice: number | null,
     liquidityInUsd: number,
     lowestHighest: LowestHighestSwapPrice,
@@ -116,8 +118,8 @@ export class CoingeckoIntegration {
       target_currency: pool.token1,
       pool_id: pool.id,
       last_price: lastPrice !== null ? lastPrice.toString() : null,
-      base_volume: poolVolume.amount0_in.toString(),
-      target_volume: poolVolume.amount1_in.toString(),
+      base_volume: poolVolume[0].toString(),
+      target_volume: poolVolume[1].toString(),
       liquidity_in_usd: liquidityInUsd.toString(),
       high:
         lowestHighest.max_price_0in !== null
