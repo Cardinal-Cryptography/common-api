@@ -153,7 +153,9 @@ export async function pairSwapVolume(
     pool: poolId,
     // can't do 0n b/c it breaks in runtime with serialization error.
     amount0_in: 0 as unknown as bigint,
+    amount0_out: 0 as unknown as bigint,
     amount1_in: 0 as unknown as bigint,
+    amount1_out: 0 as unknown as bigint,
   };
   const query = client.iterate({
     query: pairSwapVolumeQuery(poolId, fromMillis, toMillis),
@@ -212,7 +214,9 @@ function pairSwapVolumesQuery(fromMillis: bigint, toMillis: bigint): string {
     pairSwapVolumes(fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
       pool
       amount0_in
+      amount0_out
       amount1_in
+      amount1_out
     }
   }
 `;
@@ -228,7 +232,9 @@ function pairSwapVolumeQuery(
     pairSwapVolume(poolId: "${poolId}", fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
       pool
       amount0_in
+      amount0_out
       amount1_in
+      amount1_out
     }
   }
 `;

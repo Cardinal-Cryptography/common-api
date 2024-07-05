@@ -20,7 +20,14 @@ export interface PoolV2 {
 export interface PairSwapVolume {
   pool: string;
   amount0_in: bigint;
+  amount0_out: bigint;
   amount1_in: bigint;
+  amount1_out: bigint;
+}
+
+export interface TotalPairSwapVolume {
+  token0Volume: number;
+  token1Volume: number;
 }
 
 export interface LowestHighestSwapPrice {
