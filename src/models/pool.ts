@@ -101,7 +101,7 @@ export class Pools {
     tokenInfo: TokenInfoById,
     fromMillis: bigint,
     toMillis: bigint,
-  ): Promise<TotalLowestHighestSwapPrice | null> {
+  ): Promise<LowestHighestSwapPrice | null> {
     if (!this.graphqlClient) {
       return null;
     }

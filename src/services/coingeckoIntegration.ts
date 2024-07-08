@@ -106,6 +106,10 @@ export class CoingeckoIntegration {
     pool: PoolV2,
     tokenInfo: TokenInfoById,
   ): Promise<TotalLowestHighestSwapPrice> {
+    let swapPrice: TotalLowestHighestSwapPrice = {
+      lowestPrice: null,
+      highestPrice: null,
+    };
     let now_millis = new Date().getTime();
     let yesterday_millis = now_millis - DAY_IN_MILLIS;
     const price = await this.pools.poolLowestHighestSwapPrice(
@@ -114,14 +118,29 @@ export class CoingeckoIntegration {
       BigInt(yesterday_millis),
       BigInt(now_millis),
     );
-    if (!price) {
-      return {
-        lowestPrice: null,
-        highestPrice: null,
-      };
-    } else {
-      return price;
+    if (price !== null && price.min_price_0in !== null && price.max_price_0in !== null && price.min_price_0out !== null && price.max_price_0out !== null) {
+      const decimals0 = tokenInfo.getDecimals(pool.token0);
+      const decimals1 = tokenInfo.getDecimals(pool.token1);
+      if (decimals0 && decimals1) {
+        const minPrice =
+          Math.min(
+            price.min_price_0in,
+            price.min_price_0out,
+          ) *
+          10 ** (decimals0 - decimals1);
+        const maxPrice =
+          Math.max(
+            price.max_price_0in,
+            price.max_price_0out,
+          ) *
+          10 ** (decimals0 - decimals1);
+        swapPrice = {
+          lowestPrice: minPrice,
+          highestPrice: maxPrice,
+        };
+      }
     }
+    return swapPrice
   }
 
   private poolToTicker(
