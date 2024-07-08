@@ -118,26 +118,26 @@ export class CoingeckoIntegration {
       BigInt(yesterday_millis),
       BigInt(now_millis),
     );
-    if (
-      price !== null &&
-      price.min_price_0in !== null &&
-      price.max_price_0in !== null &&
-      price.min_price_0out !== null &&
-      price.max_price_0out !== null
-    ) {
-      const decimals0 = tokenInfo.getDecimals(pool.token0);
-      const decimals1 = tokenInfo.getDecimals(pool.token1);
-      if (decimals0 && decimals1) {
-        const minPrice =
-          Math.min(price.min_price_0in, price.min_price_0out) *
-          10 ** (decimals0 - decimals1);
-        const maxPrice =
-          Math.max(price.max_price_0in, price.max_price_0out) *
-          10 ** (decimals0 - decimals1);
-        swapPrice = {
-          lowestPrice: minPrice,
-          highestPrice: maxPrice,
-        };
+    const decimals0 = tokenInfo.getDecimals(pool.token0);
+    const decimals1 = tokenInfo.getDecimals(pool.token1);
+    if (price !== null && decimals0 && decimals1) {
+      let minPrice = price.min_price_0in
+      let maxPrice = price.max_price_0in
+      if (price.min_price_0out !== null) {
+        minPrice = minPrice === null ? price.min_price_0out : Math.min(minPrice, price.min_price_0out)
+      }
+      if (price.max_price_0out !== null) {
+        maxPrice = maxPrice === null ? price.max_price_0out : Math.max(maxPrice, price.max_price_0out)
+      }
+
+      // both are null, or both aren't
+      if (minPrice !== null && maxPrice !== null) {
+        minPrice *= 10 ** (decimals0 - decimals1)
+        maxPrice *= 10 ** (decimals0 - decimals1)
+      }
+      swapPrice = {
+        lowestPrice: minPrice,
+        highestPrice: maxPrice,
       }
     }
     return swapPrice;
