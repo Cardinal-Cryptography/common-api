@@ -33,7 +33,14 @@ export interface TotalPairSwapVolume {
 export interface LowestHighestSwapPrice {
   pool: string;
   min_price_0in: number | null;
+  min_price_0out: number | null;
   max_price_0in: number | null;
+  max_price_0out: number | null;
+}
+
+export interface TotalLowestHighestSwapPrice {
+  lowestPrice: number | null;
+  highestPrice: number | null;
 }
 
 export interface SwapAmounts {
@@ -98,7 +105,7 @@ export class Pools {
     if (!this.graphqlClient) {
       return null;
     }
-    // We want to query the volumes for the nearest minut.
+    // We want to query the volumes for the nearest minute.
     // This way we can leverage GraphQL caching functionality.
     const fromNearestMinute = (fromMillis / 60000n) * 60000n;
     const toNearestMinute = (toMillis / 60000n) * 60000n;
@@ -119,7 +126,7 @@ export class Pools {
     if (!this.graphqlClient) {
       return null;
     }
-    // We want to query the volumes for the nearest minut.
+    // We want to query the volumes for the nearest minute.
     // This way we can leverage GraphQL caching functionality.
     const fromNearestMinute = (fromMillis / 60000n) * 60000n;
     const toNearestMinute = (toMillis / 60000n) * 60000n;

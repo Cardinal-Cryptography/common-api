@@ -5,6 +5,7 @@ import {
   PairSwapVolume,
   PoolV2,
   SwapAmounts,
+  TotalLowestHighestSwapPrice,
 } from "../models/pool";
 import { Observable, mergeMap } from "rxjs";
 import { poolsV2ConnectionsQuery as poolReservesV2 } from "./v2/queries";
@@ -73,12 +74,7 @@ export async function pairLowestHighestSwapPrice(
   tokenInfo: TokenInfoById,
   fromMillis: bigint,
   toMillis: bigint,
-): Promise<LowestHighestSwapPrice> {
-  let swapPrice: LowestHighestSwapPrice = {
-    pool: pool.id,
-    min_price_0in: null,
-    max_price_0in: null,
-  };
+): Promise<LowestHighestSwapPrice | null> {
   const query = client.iterate({
     query: lowestHighestSwapsPriceQuery(pool.id, fromMillis, toMillis),
   });
@@ -91,32 +87,31 @@ export async function pairLowestHighestSwapPrice(
       if (swapPrices.length > 2 || swapPrices.length == 0) {
         console.error(`Expected 1 or 2 swap prices, got ${swapPrices.length}`);
       } else {
-        if (
-          swapPrices[0].min_price_0in === null ||
-          swapPrices[0].max_price_0in === null
-        ) {
-          return swapPrice;
-        }
-        const decimals0 = tokenInfo.getDecimals(pool.token0);
-        const decimals1 = tokenInfo.getDecimals(pool.token1);
-        if (decimals0 && decimals1) {
-          const minPrice =
-            swapPrices[0].min_price_0in * 10 ** (decimals0 - decimals1);
-          const maxPrice =
-            swapPrices[0].max_price_0in * 10 ** (decimals0 - decimals1);
-          swapPrice = {
-            pool: pool.id,
-            min_price_0in: minPrice,
-            max_price_0in: maxPrice,
-          };
-        }
+        // If swapPrices[1] exists, then input prices are in swapPrices[0], and output prices are in
+        // swapPrices[1]. If swapPrices[1] doesn't exist then all prices must be null, which is also
+        // handled by the logic below. See the corresponding query in common-amm-indexer.
+        const minPrice0In = swapPrices[0].min_price_0in;
+        const maxPrice0In = swapPrices[0].max_price_0in;
+        const minPrice0Out = swapPrices[1]
+          ? swapPrices[1].min_price_0out
+          : null;
+        const maxPrice0Out = swapPrices[1]
+          ? swapPrices[1].max_price_0out
+          : null;
+
+        return {
+          pool: swapPrices[0].pool,
+          min_price_0in: minPrice0In,
+          max_price_0in: maxPrice0In,
+          min_price_0out: minPrice0Out,
+          max_price_0out: maxPrice0Out,
+        };
       }
     }
   } catch (err) {
     console.error(err);
   }
-
-  return swapPrice;
+  return null;
 }
 
 /// Query all pair swap volumes from the GraphQL server.
@@ -202,7 +197,9 @@ function lowestHighestSwapsPriceQuery(
     lowestHighestSwapPrice(poolId: "${poolId}", fromMillis: ${fromMillis}, toMillis: ${toMillis}) {
       pool
       min_price_0in
+      min_price_0out
       max_price_0in
+      max_price_0out
     }
   }
 `;

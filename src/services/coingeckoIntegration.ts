@@ -2,6 +2,7 @@ import {
   LowestHighestSwapPrice,
   Pools,
   PoolV2,
+  TotalLowestHighestSwapPrice,
   TotalPairSwapVolume,
 } from "../models/pool";
 import { PairSwapVolume } from "../models/pool";
@@ -104,7 +105,11 @@ export class CoingeckoIntegration {
   private async pairLowestHighestSwapPrice(
     pool: PoolV2,
     tokenInfo: TokenInfoById,
-  ): Promise<LowestHighestSwapPrice> {
+  ): Promise<TotalLowestHighestSwapPrice> {
+    let swapPrice: TotalLowestHighestSwapPrice = {
+      lowestPrice: null,
+      highestPrice: null,
+    };
     let now_millis = new Date().getTime();
     let yesterday_millis = now_millis - DAY_IN_MILLIS;
     const price = await this.pools.poolLowestHighestSwapPrice(
@@ -113,15 +118,35 @@ export class CoingeckoIntegration {
       BigInt(yesterday_millis),
       BigInt(now_millis),
     );
-    if (!price) {
-      return {
-        pool: pool.id,
-        min_price_0in: null,
-        max_price_0in: null,
+    const decimals0 = tokenInfo.getDecimals(pool.token0);
+    const decimals1 = tokenInfo.getDecimals(pool.token1);
+    if (price !== null && decimals0 && decimals1) {
+      let minPrice = price.min_price_0in;
+      let maxPrice = price.max_price_0in;
+      if (price.min_price_0out !== null) {
+        minPrice =
+          minPrice === null
+            ? price.min_price_0out
+            : Math.min(minPrice, price.min_price_0out);
+      }
+      if (price.max_price_0out !== null) {
+        maxPrice =
+          maxPrice === null
+            ? price.max_price_0out
+            : Math.max(maxPrice, price.max_price_0out);
+      }
+
+      // both are null, or both aren't
+      if (minPrice !== null && maxPrice !== null) {
+        minPrice *= 10 ** (decimals0 - decimals1);
+        maxPrice *= 10 ** (decimals0 - decimals1);
+      }
+      swapPrice = {
+        lowestPrice: minPrice,
+        highestPrice: maxPrice,
       };
-    } else {
-      return price;
     }
+    return swapPrice;
   }
 
   private poolToTicker(
@@ -129,7 +154,7 @@ export class CoingeckoIntegration {
     poolVolume: TotalPairSwapVolume,
     lastPrice: number | null,
     liquidityInUsd: number,
-    lowestHighest: LowestHighestSwapPrice,
+    lowestHighest: TotalLowestHighestSwapPrice,
   ): Ticker {
     return {
       ticker_id: `${pool.token0}_${pool.token1}`,
@@ -141,12 +166,12 @@ export class CoingeckoIntegration {
       target_volume: poolVolume.token1Volume.toString(),
       liquidity_in_usd: liquidityInUsd.toString(),
       high:
-        lowestHighest.max_price_0in !== null
-          ? lowestHighest.max_price_0in.toString()
+        lowestHighest.highestPrice !== null
+          ? lowestHighest.highestPrice.toString()
           : null,
       low:
-        lowestHighest.min_price_0in !== null
-          ? lowestHighest.min_price_0in.toString()
+        lowestHighest.lowestPrice !== null
+          ? lowestHighest.lowestPrice.toString()
           : null,
     };
   }
