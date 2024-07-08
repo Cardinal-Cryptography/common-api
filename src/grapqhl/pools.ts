@@ -87,10 +87,11 @@ export async function pairLowestHighestSwapPrice(
       if (swapPrices.length > 2 || swapPrices.length == 0) {
         console.error(`Expected 1 or 2 swap prices, got ${swapPrices.length}`);
       } else {
-        // min / max token0 input prices are in swapPrices[0]
+        // If swapPrices[1] exists, then input prices are in swapPrices[0], and output prices are in
+        // swapPrices[1]. If swapPrices[1] doesn't exist then all prices must be null, which is also
+        // handled by the logic below. See the corresponding query in common-amm-indexer.
         const minPrice0In = swapPrices[0].min_price_0in;
         const maxPrice0In = swapPrices[0].max_price_0in;
-        // min / max token0 output prices are in swapPrices[1] (which not always exists)
         const minPrice0Out = swapPrices[1]
           ? swapPrices[1].min_price_0out
           : null;
