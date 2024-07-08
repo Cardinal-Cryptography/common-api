@@ -118,21 +118,21 @@ export class CoingeckoIntegration {
       BigInt(yesterday_millis),
       BigInt(now_millis),
     );
-    if (price !== null && price.min_price_0in !== null && price.max_price_0in !== null && price.min_price_0out !== null && price.max_price_0out !== null) {
+    if (
+      price !== null &&
+      price.min_price_0in !== null &&
+      price.max_price_0in !== null &&
+      price.min_price_0out !== null &&
+      price.max_price_0out !== null
+    ) {
       const decimals0 = tokenInfo.getDecimals(pool.token0);
       const decimals1 = tokenInfo.getDecimals(pool.token1);
       if (decimals0 && decimals1) {
         const minPrice =
-          Math.min(
-            price.min_price_0in,
-            price.min_price_0out,
-          ) *
+          Math.min(price.min_price_0in, price.min_price_0out) *
           10 ** (decimals0 - decimals1);
         const maxPrice =
-          Math.max(
-            price.max_price_0in,
-            price.max_price_0out,
-          ) *
+          Math.max(price.max_price_0in, price.max_price_0out) *
           10 ** (decimals0 - decimals1);
         swapPrice = {
           lowestPrice: minPrice,
@@ -140,7 +140,7 @@ export class CoingeckoIntegration {
         };
       }
     }
-    return swapPrice
+    return swapPrice;
   }
 
   private poolToTicker(

@@ -87,25 +87,16 @@ export async function pairLowestHighestSwapPrice(
       if (swapPrices.length > 2 || swapPrices.length == 0) {
         console.error(`Expected 1 or 2 swap prices, got ${swapPrices.length}`);
       } else {
-        let minPrice0In = swapPrices[0].min_price_0in
-        if (minPrice0In === null && swapPrices[1]) {
-          minPrice0In = swapPrices[1].min_price_0in
-        }
-
-        let maxPrice0In = swapPrices[0].max_price_0in
-        if (maxPrice0In === null && swapPrices[1]) {
-          maxPrice0In = swapPrices[1].max_price_0in
-        }
-
-        let minPrice0Out = swapPrices[0].min_price_0out
-        if (minPrice0Out === null && swapPrices[1]) {
-          minPrice0Out = swapPrices[1].min_price_0out
-        }
-
-        let maxPrice0Out = swapPrices[0].max_price_0out
-        if (maxPrice0Out === null && swapPrices[1]) {
-          maxPrice0Out = swapPrices[1].max_price_0out
-        }
+        // min / max token0 input prices are in swapPrices[0]
+        const minPrice0In = swapPrices[0].min_price_0in;
+        const maxPrice0In = swapPrices[0].max_price_0in;
+        // min / max token0 output prices are in swapPrices[1] (which not always exists)
+        const minPrice0Out = swapPrices[1]
+          ? swapPrices[1].min_price_0out
+          : null;
+        const maxPrice0Out = swapPrices[1]
+          ? swapPrices[1].max_price_0out
+          : null;
 
         return {
           pool: swapPrices[0].pool,
@@ -119,7 +110,7 @@ export async function pairLowestHighestSwapPrice(
   } catch (err) {
     console.error(err);
   }
-  return null
+  return null;
 }
 
 /// Query all pair swap volumes from the GraphQL server.
