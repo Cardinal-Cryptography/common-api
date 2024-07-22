@@ -25,7 +25,7 @@ export const poolsV2SubscriptionQuery: SubscriptionQuery =
   new SubscriptionQuery(
     "pools",
     "id token0 token1 reserves0 reserves1 blockTimestamp",
-    60,
+    200,
     "blockTimestamp_ASC",
   );
 
