@@ -22,7 +22,7 @@
     "config": "^3.3.11",
     "cors": "^2.8.5",
     "cross-fetch": "^4.0.0",
-    "express": "^5.0.0-beta.3",
+    "express": "^5.0.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "graphql-ws": "^5.15.0",
