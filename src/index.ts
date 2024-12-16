@@ -58,6 +58,7 @@ async function main(): Promise<void> {
         /\.d15umvvtx19run\.amplifyapp\.com$/, // AWS amplify previews
         /^http:\/\/localhost:[0-9]*$/, // local development
         /^http:\/\/127\.0\.0\.1:[0-9]*$/, // local development
+        /^chrome-extension:\/\/gaaehfidjhhdadgepelamhnekfghhmml$/,
       ],
     }),
   );
